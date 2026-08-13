@@ -10,6 +10,7 @@ from .fetchers import fetch_sources
 from .http_client import FetchError
 from .push import send_to_all
 from .state import StateStore
+from .translation import translate_candidates
 
 LOG = logging.getLogger("tracker")
 
@@ -93,12 +94,13 @@ def run(args: argparse.Namespace) -> int:
             LOG.info(
                 "candidate @%s %s %s text=%s",
                 tweet.author,
-                tweet.created_at,
+                tweet.published_at,
                 tweet.url,
                 tweet.text[:120].replace("\n", " "),
             )
 
         if dry_run:
+            translate_candidates(candidates, settings)
             for tweet in candidates:
                 title, content = render_tweet_html(tweet)
                 print(f"\n=== {title} ===\n{content}")
@@ -128,6 +130,9 @@ def run(args: argparse.Namespace) -> int:
         if not store.can_push(state, push_units, settings.max_push_per_day):
             LOG.warning("not enough daily PushPlus budget for the next notification")
             return 0
+
+        # Translate only posts that will actually be delivered.
+        translate_candidates(selected, settings)
 
         # Claim before sending. This deliberately favors no duplicate notifications over
         # automatic re-delivery after an ambiguous network failure.

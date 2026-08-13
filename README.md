@@ -5,12 +5,15 @@
 - `@jukan05`
 - `@aleabitoreddit`（Serenity）
 
+`aichainmap` 是第三方的 AI 产业链地图/知识库网站。它的 [Serenity 页面](https://aichainmap.com/serenity/) 会抓取公开 X 内容、整理成时间线，并为部分内容提供中英对照和主题标签。它不是 X 官方接口，也不是 Serenity 本人运营的账号；因此它是交叉来源，不是绝对权威。
+
 当前实现不购买 X API、不使用登录 Cookie、不需要梯子或 VPS。采集顺序是：
 
 1. Serenity：读取 `aichainmap.com` 使用的公开实时 feed；feed 失败时读取页面内公开的实时增量数据。
-2. 两个账号：读取公开 X 主页 HTML 中的 Schema.org 帖子字段，作为 Jukan05 的主源和 Serenity 的交叉校验源。
-3. 本地状态：用 `state.json` 保存水位、已见 ID 和发送记录。
-4. 推送：可选 PushPlus 微信渠道。没有 token 时可用 `--dry-run`，只抓取和打印，不发送。当前脚本每日最多 200 个逻辑推送，与实名微信渠道额度对齐。
+2. 两个账号：读取公开 X 主页 HTML 中的 Schema.org 帖子字段，并在 X HTML 只给预览时尝试免费公开详情中转源。
+3. 中文：aichainmap 有中文时优先使用；X 英文内容没有中文时，使用智谱 GLM 翻译。翻译失败仍保留英文原文。
+4. 本地状态：用 `state.json` 保存发布时间水位、已见 ID 和发送记录。
+5. 推送：可选 PushPlus 微信渠道。没有 token 时可用 `--dry-run`，只抓取和打印，不发送。当前脚本每日最多 200 个逻辑推送，与实名微信渠道额度对齐。
 
 ## 本地测试
 
@@ -42,21 +45,28 @@ python3 -m src.main
 
 接收微信消息：在微信中关注 `pushplus 推送加` 服务号，消息会通过这个服务号发给你。默认是微信渠道；如果想直接在消息里看到正文，可以在服务号里发送“激活消息”，否则通常点击通知进入详情页查看。Token 只放在本机环境变量或 GitHub Actions Secret 中，不要写进代码、README 或 `state.json`。
 
+## 智谱翻译配置
+
+GitHub Actions 使用加密 Secret `ZHIPU_API_KEY` 调用智谱对话补全接口；默认模型为 `glm-4.7-flash`。智谱官方建议使用 Bearer 认证并通过环境变量保存 API Key，不能把 Key 提交到仓库。[官方接口文档](https://docs.bigmodel.cn/api-reference/%E6%A8%A1%E5%9E%8B-api/%E5%AF%B9%E8%AF%9D%E8%A1%A5%E5%85%A8)
+
+只翻译最终要推送的 X 帖子，不翻译整个历史 feed。aichainmap 已经提供中文的帖子不会重复调用智谱。
+
 ## GitHub Actions
 
 把整个目录放入一个 GitHub 仓库，建议使用 public repository。标准 GitHub-hosted runner 对 public repository 免费。然后在仓库的 Settings → Secrets and variables → Actions 中添加：
 
 - `PUSHPLUS_TOKENS`：一个或多个 PushPlus token，逗号分隔；
+- `ZHIPU_API_KEY`：智谱 API Key，用于 X 英文内容翻译；
 - 可选 `PUSHPLUS_TOPIC`：PushPlus 群组编码。
 
 工作流每 5 分钟执行一次，也可以在 Actions 页面手动运行。GitHub 的 `schedule` 最短间隔就是 5 分钟，且高负载时可能延迟；工作流会把 `state.json` 回写到仓库。工作流每日最多 200 个逻辑推送。
 
-手动运行时可以选择 `push_latest` 做端到端测试：它会推送两个账号各一条当前最新内容；日常定时运行默认使用 `latest`，只建立首次基线并等待新帖子。
+手动运行时可以选择 `push_latest` 做端到端测试，并把 `limit` 设为 `2`；日常定时运行默认使用 `latest`，只建立首次基线并等待新帖子。
 
 ## 重要边界
 
-这是零成本、公开页面读取版，能工作不代表永久稳定：X 可能改变公开 HTML、限制匿名页面或调整页面结构；aichainmap 的 feed 也属于第三方公开服务。代码不会绕过登录、验证码、限流或安全控制。
+这是零成本、公开页面读取版，能工作不代表永久稳定：X 可能改变公开 HTML、限制匿名页面、对订阅内容只返回预览，或调整页面结构；aichainmap 的 feed 和免费详情中转源也属于第三方公开服务。代码不会绕过登录、验证码、付费订阅、限流或安全控制。
 
 去重逻辑采用“先 claim、后发送”：这样优先避免同一条帖子被重复推送，但如果 PushPlus 在发送后发生网络中断，系统可能选择漏掉这一条，而不是下次重复发送。跨 GitHub 任务的绝对 exactly-once 仍然无法由免费文件状态保证。
 
-摘要是规则型摘要，不调用付费模型；Serenity feed 有中文译文时优先展示译文，否则展示英文原文首段。股票代码只对 `$TICKER` 和括号中的四位市场代码做保守提取，不把所有大写英文词都当成股票。
+原文不再按 420 字符截断；如果上游返回的是截断预览，消息会明确标记正文状态并给出 X 原文链接。`published_at` 表示帖子发布时间，`last_published_at` 是每个账号的发布时间水位，不是抓取时间。股票代码只对 `$TICKER` 和括号中的四位市场代码做保守提取，不把所有大写英文词都当成股票。

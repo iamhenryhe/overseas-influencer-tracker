@@ -42,10 +42,15 @@ class Settings:
     aichainmap_feed_url: str
     aichainmap_page_url: str
     x_profile_base_url: str
+    x_detail_base_url: str
     pushplus_tokens: tuple[str, ...]
     pushplus_topic: str
+    zhipu_api_key: str
+    zhipu_model: str
     fetch_x_html: bool
+    fetch_x_detail: bool
     fetch_aichainmap: bool
+    translate_x: bool
     include_replies: bool
     max_push_per_day: int
     max_digest_items: int
@@ -65,10 +70,15 @@ class Settings:
             ),
             aichainmap_page_url=os.getenv("AICHAINMAP_PAGE_URL", "https://aichainmap.com/serenity/"),
             x_profile_base_url=os.getenv("X_PROFILE_BASE_URL", "https://x.com"),
+            x_detail_base_url=os.getenv("X_DETAIL_BASE_URL", "https://api.fxtwitter.com/status").rstrip("/"),
             pushplus_tokens=_tokens(),
             pushplus_topic=os.getenv("PUSHPLUS_TOPIC", "").strip(),
+            zhipu_api_key=os.getenv("ZHIPU_API_KEY", "").strip(),
+            zhipu_model=os.getenv("ZHIPU_MODEL", "glm-4.7-flash").strip() or "glm-4.7-flash",
             fetch_x_html=_bool("FETCH_X_HTML", True),
+            fetch_x_detail=_bool("FETCH_X_DETAIL", True),
             fetch_aichainmap=_bool("FETCH_AICHAINMAP", True),
+            translate_x=_bool("TRANSLATE_X", True),
             include_replies=_bool("INCLUDE_REPLIES", True),
             max_push_per_day=max(1, _int("MAX_PUSH_PER_DAY", 200)),
             max_digest_items=max(1, _int("MAX_DIGEST_ITEMS", 20)),

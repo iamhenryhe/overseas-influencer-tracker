@@ -31,11 +31,11 @@ def utc_date() -> str:
 
 def empty_state() -> dict[str, Any]:
     return {
-        "version": 2,
+        "version": 3,
         "initialized": False,
         "seen_ids": [],
         "claims": {},
-        "last_seen": {},
+        "last_published_at": {},
         "daily_push": {},
     }
 
@@ -73,8 +73,13 @@ class StateStore:
             state.update(value)
         state.setdefault("seen_ids", [])
         state.setdefault("claims", {})
-        state.setdefault("last_seen", {})
+        # v2 used the ambiguous name `last_seen`; migrate it to the actual
+        # semantic meaning: the latest published timestamp per author.
+        if "last_published_at" not in state:
+            state["last_published_at"] = state.get("last_seen", {})
+        state.pop("last_seen", None)
         state.setdefault("daily_push", {})
+        state["version"] = 3
         return state
 
     def save(self, state: dict[str, Any]) -> None:
@@ -103,23 +108,23 @@ class StateStore:
     def bootstrap(self, state: dict[str, Any], tweets: list[Tweet]) -> None:
         for tweet in tweets:
             self._add_seen(state, tweet.key)
-            previous = state.setdefault("last_seen", {}).get(tweet.author, "")
-            if tweet.created_at > previous:
-                state["last_seen"][tweet.author] = tweet.created_at
+            previous = state.setdefault("last_published_at", {}).get(tweet.author, "")
+            if tweet.published_at > previous:
+                state["last_published_at"][tweet.author] = tweet.published_at
         state["initialized"] = True
 
     def candidates(self, state: dict[str, Any], tweets: list[Tweet], *, include_old: bool = False) -> list[Tweet]:
         seen = set(state.get("seen_ids", []))
         claims = state.get("claims", {})
-        watermarks = state.get("last_seen", {})
+        watermarks = state.get("last_published_at", {})
         result = []
         for tweet in tweets:
             if tweet.key in seen or tweet.key in claims:
                 continue
-            if not include_old and watermarks.get(tweet.author) and tweet.created_at <= watermarks[tweet.author]:
+            if not include_old and watermarks.get(tweet.author) and tweet.published_at <= watermarks[tweet.author]:
                 continue
             result.append(tweet)
-        return sorted(result, key=lambda item: (item.created_at, item.id))
+        return sorted(result, key=lambda item: (item.published_at, item.id))
 
     def claim(self, state: dict[str, Any], tweets: list[Tweet], recipient_count: int) -> None:
         claims = state.setdefault("claims", {})
@@ -132,9 +137,9 @@ class StateStore:
                 "sources": tweet.sources,
             }
             self._add_seen(state, tweet.key)
-            previous = state.setdefault("last_seen", {}).get(tweet.author, "")
-            if tweet.created_at > previous:
-                state["last_seen"][tweet.author] = tweet.created_at
+            previous = state.setdefault("last_published_at", {}).get(tweet.author, "")
+            if tweet.published_at > previous:
+                state["last_published_at"][tweet.author] = tweet.published_at
         if len(claims) > MAX_CLAIMS:
             oldest = sorted(claims, key=lambda key: claims[key].get("claimed_at", ""))
             for key in oldest[:-MAX_CLAIMS]:

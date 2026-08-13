@@ -26,38 +26,45 @@ def extract_symbols(tweet: Tweet) -> list[str]:
     return symbols
 
 
-def concise_summary(tweet: Tweet, max_chars: int = 420) -> str:
+def concise_summary(tweet: Tweet, max_chars: int | None = None) -> str:
+    """Return the full available text; max_chars remains for API compatibility."""
     source = tweet.text_cn.strip() or tweet.text.strip()
     source = re.sub(r"\s+", " ", source)
-    if len(source) <= max_chars:
-        return source
-    first_paragraph = re.split(r"\n\s*\n", tweet.text_cn.strip() or tweet.text.strip(), maxsplit=1)[0].strip()
-    first_paragraph = re.sub(r"\s+", " ", first_paragraph)
-    if first_paragraph and len(first_paragraph) <= max_chars:
-        return first_paragraph
-    return source[: max_chars - 1].rstrip() + "…"
+    return source
 
 
 def _times(tweet: Tweet) -> tuple[str, str]:
     try:
-        value = datetime.fromisoformat(tweet.created_at.replace("Z", "+00:00"))
+        value = datetime.fromisoformat(tweet.published_at.replace("Z", "+00:00"))
         et = value.astimezone(ZoneInfo("America/New_York"))
         cn = value.astimezone(ZoneInfo("Asia/Shanghai"))
         return et.strftime("%m-%d %H:%M ET"), cn.strftime("%m-%d %H:%M 北京")
     except (ValueError, TypeError):
-        return tweet.created_at, tweet.created_at
+        return tweet.published_at, tweet.published_at
 
 
 def render_tweet_html(tweet: Tweet) -> tuple[str, str]:
     et, cn = _times(tweet)
     symbols = extract_symbols(tweet)
     title = f"{tweet.author} 新推 · {et}"
-    kind = "回复" if tweet.is_reply else "引用" if tweet.is_quote else "原创"
+    kind = "回复" if tweet.is_reply else "引用" if tweet.is_quote else "转发" if tweet.is_retweet else "普通帖"
     symbol_text = "、".join(symbols) if symbols else "未识别到明确代码"
+    status = ""
+    if tweet.content_status != "complete":
+        status = (
+            f"<p><b>正文状态：</b>公开来源只返回了截断预览（{html.escape(tweet.truncation_reason or '未知原因')}）；"
+            "请点击原文查看完整内容。</p>"
+        )
+    translation = ""
+    if tweet.text_cn:
+        label = "中文翻译（截断预览）" if tweet.content_status != "complete" else "中文翻译"
+        translation = f"<p><b>{label}：</b>{html.escape(tweet.text_cn).replace(chr(10), '<br>')}</p>"
     body = (
         f"<p><b>账号：</b>@{html.escape(tweet.author)}　<b>类型：</b>{kind}</p>"
         f"<p><b>时间：</b>{html.escape(et)} / {html.escape(cn)}</p>"
-        f"<p><b>观点：</b>{html.escape(concise_summary(tweet)).replace(chr(10), '<br>')}</p>"
+        f"<p><b>原文：</b>{html.escape(tweet.text).replace(chr(10), '<br>')}</p>"
+        f"{translation}"
+        f"{status}"
         f"<p><b>标的：</b>{html.escape(symbol_text)}</p>"
         f"<p><a href=\"{html.escape(tweet.url, quote=True)}\">在 X 打开原文</a></p>"
         f"<p><small>来源：{html.escape(', '.join(tweet.sources))} · NFA（非投资建议）</small></p>"
@@ -79,4 +86,3 @@ def render_digest_html(tweets: list[Tweet]) -> tuple[str, str]:
         )
     body = "<p>检测到多条新信息，已合并推送：</p><ol>" + "".join(items) + "</ol><p><small>NFA（非投资建议）</small></p>"
     return title, body
-

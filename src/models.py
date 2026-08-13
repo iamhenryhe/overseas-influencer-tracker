@@ -8,16 +8,19 @@ from typing import Any
 class Tweet:
     id: str
     author: str
-    created_at: str
+    published_at: str
     text: str
     url: str
     text_cn: str = ""
+    translation_source: str = ""
     media: list[str] = field(default_factory=list)
     is_reply: bool = False
     is_quote: bool = False
     is_retweet: bool = False
     reply_to: dict[str, Any] | None = None
     quote: dict[str, Any] | None = None
+    content_status: str = "complete"
+    truncation_reason: str = ""
     sources: list[str] = field(default_factory=list)
 
     @property
@@ -28,16 +31,18 @@ class Tweet:
         return {
             "id": self.id,
             "author": self.author,
-            "created_at": self.created_at,
+            "published_at": self.published_at,
             "text": self.text,
             "url": self.url,
             "text_cn": self.text_cn,
+            "translation_source": self.translation_source,
             "media": self.media,
             "is_reply": self.is_reply,
             "is_quote": self.is_quote,
             "is_retweet": self.is_retweet,
             "reply_to": self.reply_to,
             "quote": self.quote,
+            "content_status": self.content_status,
+            "truncation_reason": self.truncation_reason,
             "sources": self.sources,
         }
-

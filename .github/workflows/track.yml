@@ -1,0 +1,60 @@
+name: Free public-source tracker
+
+on:
+  schedule:
+    # GitHub's shortest supported schedule interval is 5 minutes.
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      bootstrap_mode:
+        description: "First-run behavior: silent baseline or send latest posts"
+        required: true
+        default: latest
+        type: choice
+        options:
+          - latest
+          - push_latest
+
+permissions:
+  contents: write
+
+concurrency:
+  group: free-public-source-tracker
+  cancel-in-progress: false
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch, deduplicate, and notify
+        env:
+          TARGET_ACCOUNTS: jukan05,aleabitoreddit
+          PUSHPLUS_TOKENS: ${{ secrets.PUSHPLUS_TOKENS }}
+          PUSHPLUS_TOPIC: ${{ secrets.PUSHPLUS_TOPIC }}
+          BOOTSTRAP_MODE: ${{ inputs.bootstrap_mode || 'latest' }}
+          MAX_PUSH_PER_DAY: "200"
+        run: python -m src.main
+
+      - name: Persist state
+        if: ${{ success() }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          if git diff --cached --quiet; then
+            echo "state unchanged"
+          else
+            git commit -m "chore: update tracker state"
+            git push
+          fi

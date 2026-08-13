@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "alert_active": true,
-  "alert_kind": "missing",
+  "alert_active": false,
+  "alert_kind": "",
   "alerted_at": "2026-08-13T08:25:12.075550Z",
-  "message": "还没有收到跟踪器心跳，跟踪任务可能没有启动。"
+  "recovered_at": "2026-08-13T08:28:54.396753Z"
 }

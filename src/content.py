@@ -10,6 +10,10 @@ from .models import Tweet
 CASHTAG_RE = re.compile(r"(?<![A-Za-z0-9_])\$([A-Za-z]{1,6})(?![A-Za-z0-9_])")
 PAREN_CODE_RE = re.compile(r"[（(]\s*([0-9]{4})\s*[）)]")
 STOP_CASHTAGS = {"USD", "US", "AI", "YOY", "QOQ", "EBITDA", "FCF", "TAM", "ASP", "H1", "H2"}
+DISPLAY_AUTHORS = {
+    "aleabitoreddit": "serenity",
+    "jukan05": "jukan",
+}
 
 
 def extract_symbols(tweet: Tweet) -> list[str]:
@@ -38,21 +42,25 @@ def _times(tweet: Tweet) -> tuple[str, str]:
         value = datetime.fromisoformat(tweet.published_at.replace("Z", "+00:00"))
         et = value.astimezone(ZoneInfo("America/New_York"))
         cn = value.astimezone(ZoneInfo("Asia/Shanghai"))
-        return et.strftime("%m-%d %H:%M ET"), cn.strftime("%m-%d %H:%M 北京")
+        return et.strftime("%m-%d %H:%M ET"), cn.strftime("%Y-%m-%d %H:%M:%S")
     except (ValueError, TypeError):
         return tweet.published_at, tweet.published_at
 
 
+def display_author(author: str) -> str:
+    return DISPLAY_AUTHORS.get(author.lower().lstrip("@"), author.lower().lstrip("@"))
+
+
 def render_tweet_html(tweet: Tweet) -> tuple[str, str]:
-    et, cn = _times(tweet)
+    _, cn = _times(tweet)
     symbols = extract_symbols(tweet)
-    title = f"{tweet.author} 新推 · {et}"
-    kind = "回复" if tweet.is_reply else "引用" if tweet.is_quote else "转发" if tweet.is_retweet else "普通帖"
+    title = f"作者（{tweet.author}）新推文"
+    account = display_author(tweet.author)
     symbol_text = "、".join(symbols) if symbols else "未识别到明确代码"
     status = ""
     if tweet.content_status != "complete":
         status = (
-            f"<p><b>正文状态：</b>公开来源只返回了截断预览（{html.escape(tweet.truncation_reason or '未知原因')}）；"
+            f"<p><b>正文状态：</b>公开页面只返回了截断预览（{html.escape(tweet.truncation_reason or '未知原因')}）；"
             "请点击原文查看完整内容。</p>"
         )
     translation = ""
@@ -60,14 +68,13 @@ def render_tweet_html(tweet: Tweet) -> tuple[str, str]:
         label = "中文翻译（截断预览）" if tweet.content_status != "complete" else "中文翻译"
         translation = f"<p><b>{label}：</b>{html.escape(tweet.text_cn).replace(chr(10), '<br>')}</p>"
     body = (
-        f"<p><b>账号：</b>@{html.escape(tweet.author)}　<b>类型：</b>{kind}</p>"
-        f"<p><b>时间：</b>{html.escape(et)} / {html.escape(cn)}</p>"
+        f"<p><b>账号：</b>{html.escape(account)}</p>"
+        f"<p><b>发布时间：</b>{html.escape(cn)}</p>"
         f"<p><b>原文：</b>{html.escape(tweet.text).replace(chr(10), '<br>')}</p>"
         f"{translation}"
         f"{status}"
         f"<p><b>标的：</b>{html.escape(symbol_text)}</p>"
         f"<p><a href=\"{html.escape(tweet.url, quote=True)}\">在 X 打开原文</a></p>"
-        f"<p><small>来源：{html.escape(', '.join(tweet.sources))} · NFA（非投资建议）</small></p>"
     )
     return title, body
 
@@ -79,7 +86,7 @@ def render_digest_html(tweets: list[Tweet]) -> tuple[str, str]:
         symbols = "、".join(extract_symbols(tweet)) or "—"
         items.append(
             "<li>"
-            f"<b>@{html.escape(tweet.author)}</b>　{html.escape(_times(tweet)[1])}　"
+            f"<b>{html.escape(display_author(tweet.author))}</b>　{html.escape(_times(tweet)[1])}　"
             f"<b>{html.escape(symbols)}</b>　{html.escape(concise_summary(tweet, 220))}　"
             f"<a href=\"{html.escape(tweet.url, quote=True)}\">原文</a>"
             "</li>"

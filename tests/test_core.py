@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from src.content import extract_symbols
+from src.content import extract_symbols, render_tweet_html
 from src.fetchers import parse_aichainmap_payload, parse_fxtwitter_payload, parse_x_profile
 from src.models import Tweet
 from src.state import StateStore, empty_state
@@ -100,6 +100,25 @@ class TrackerTests(unittest.TestCase):
         self.assertIsNotNone(tweet)
         self.assertEqual(tweet.published_at, "2026-08-13T01:21:18Z")
         self.assertEqual(tweet.content_status, "complete")
+
+    def test_push_message_format(self):
+        tweet = Tweet(
+            "123",
+            "aleabitoreddit",
+            "2026-08-12T23:08:56Z",
+            "A new post",
+            "https://x.com/aleabitoreddit/status/123",
+            text_cn="一条新推文",
+            is_reply=True,
+            sources=["aichainmap_feed"],
+        )
+        title, body = render_tweet_html(tweet)
+        self.assertEqual(title, "作者（aleabitoreddit）新推文")
+        self.assertIn("<b>账号：</b>serenity", body)
+        self.assertIn("<b>发布时间：</b>2026-08-13 07:08:56", body)
+        self.assertNotIn("类型", body)
+        self.assertNotIn("来源", body)
+        self.assertNotIn("ET", body)
 
 
 if __name__ == "__main__":

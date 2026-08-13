@@ -63,6 +63,10 @@ def _chat(
         "temperature": temperature,
         "max_tokens": max_tokens,
         "stream": False,
+        # Coding Plan GLM-5.2 may put a short task's output in the thinking
+        # path when thinking is left at its default. We need the final text
+        # explicitly for translation and summary messages.
+        "thinking": {"type": "disabled"},
     }
     request = urllib.request.Request(
         settings.zhipu_api_url,

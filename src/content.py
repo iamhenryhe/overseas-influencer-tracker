@@ -53,10 +53,8 @@ def display_author(author: str) -> str:
 
 def render_tweet_html(tweet: Tweet) -> tuple[str, str]:
     _, cn = _times(tweet)
-    symbols = extract_symbols(tweet)
     account = display_author(tweet.author)
     title = f"{account} 新推文"
-    symbol_text = "、".join(symbols) if symbols else "未识别到明确代码"
     status = ""
     if tweet.content_status != "complete":
         status = (
@@ -67,15 +65,18 @@ def render_tweet_html(tweet: Tweet) -> tuple[str, str]:
     if tweet.text_cn:
         label = "中文翻译（截断预览）" if tweet.content_status != "complete" else "中文翻译"
         translation = f"<p><b>{label}：</b>{html.escape(tweet.text_cn).replace(chr(10), '<br>')}</p>"
-    summary = f"<p><b>总结：</b>{html.escape(tweet.summary_cn or '暂未生成')}</p>"
+    summary = (
+        '<div style="font-size:20px;line-height:1.8;margin:0 0 18px;">'
+        f"<b>总结：</b>{html.escape(tweet.summary_cn or '暂未生成')}"
+        "</div>"
+    )
     body = (
+        f"{summary}"
         f"<p><b>账号：</b>{html.escape(account)}</p>"
         f"<p><b>发布时间：</b>{html.escape(cn)}</p>"
         f"<p><b>原文：</b>{html.escape(tweet.text).replace(chr(10), '<br>')}</p>"
         f"{translation}"
-        f"{summary}"
         f"{status}"
-        f"<p><b>标的：</b>{html.escape(symbol_text)}</p>"
         f"<p><a href=\"{html.escape(tweet.url, quote=True)}\">在 X 打开原文</a></p>"
     )
     return title, body
@@ -85,12 +86,11 @@ def render_digest_html(tweets: list[Tweet]) -> tuple[str, str]:
     title = f"大V追踪摘要 · {len(tweets)} 条"
     items = []
     for tweet in tweets:
-        symbols = "、".join(extract_symbols(tweet)) or "—"
         items.append(
             "<li>"
+            f"<div style=\"font-size:20px;line-height:1.8;\"><b>总结：</b>{html.escape(tweet.summary_cn or '暂未生成')}</div>"
             f"<b>{html.escape(display_author(tweet.author))}</b>　{html.escape(_times(tweet)[1])}　"
-            f"<b>{html.escape(symbols)}</b>　{html.escape(concise_summary(tweet, 220))}　"
-            f"<b>总结：</b>{html.escape(tweet.summary_cn or '暂未生成')}　"
+            f"{html.escape(concise_summary(tweet, 220))}　"
             f"<a href=\"{html.escape(tweet.url, quote=True)}\">原文</a>"
             "</li>"
         )

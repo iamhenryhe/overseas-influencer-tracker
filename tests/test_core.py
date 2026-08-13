@@ -117,11 +117,14 @@ class TrackerTests(unittest.TestCase):
         )
         title, body = render_tweet_html(tweet)
         self.assertEqual(title, "serenity 新推文")
+        self.assertLess(body.index("总结"), body.index("账号"))
         self.assertIn("<b>账号：</b>serenity", body)
         self.assertIn("<b>发布时间：</b>2026-08-13 07:08:56", body)
         self.assertIn("<b>总结：</b>暂未生成", body)
+        self.assertIn("font-size:20px", body)
         self.assertNotIn("类型", body)
         self.assertNotIn("来源", body)
+        self.assertNotIn("标的", body)
         self.assertNotIn("ET", body)
 
     def test_push_message_contains_glm_summary(self):
@@ -135,6 +138,7 @@ class TrackerTests(unittest.TestCase):
         )
         title, body = render_tweet_html(tweet)
         self.assertEqual(title, "jukan 新推文")
+        self.assertLess(body.index("总结"), body.index("账号"))
         self.assertIn("<b>账号：</b>jukan", body)
         self.assertIn("<b>总结：</b>核心观点是光模块需求仍然强劲。", body)
 

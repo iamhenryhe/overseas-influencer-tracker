@@ -50,6 +50,7 @@ jobs:
           ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
           ZHIPU_MODEL: glm-4.7-flash
           TRANSLATE_X: "true"
+          SUMMARIZE_X: "true"
           FETCH_X_DETAIL: "true"
           BOOTSTRAP_MODE: ${{ inputs.bootstrap_mode || 'latest' }}
           MAX_PUSH_PER_DAY: "200"

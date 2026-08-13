@@ -10,7 +10,7 @@ from .fetchers import fetch_sources
 from .http_client import FetchError
 from .push import send_to_all
 from .state import StateStore
-from .translation import translate_candidates
+from .translation import enrich_candidates
 
 LOG = logging.getLogger("tracker")
 
@@ -100,7 +100,7 @@ def run(args: argparse.Namespace) -> int:
             )
 
         if dry_run:
-            translate_candidates(candidates, settings)
+            enrich_candidates(candidates, settings)
             for tweet in candidates:
                 title, content = render_tweet_html(tweet)
                 print(f"\n=== {title} ===\n{content}")
@@ -132,7 +132,7 @@ def run(args: argparse.Namespace) -> int:
             return 0
 
         # Translate only posts that will actually be delivered.
-        translate_candidates(selected, settings)
+        enrich_candidates(selected, settings)
 
         # Claim before sending. This deliberately favors no duplicate notifications over
         # automatic re-delivery after an ambiguous network failure.

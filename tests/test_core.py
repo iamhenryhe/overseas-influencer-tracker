@@ -1,9 +1,12 @@
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from src.content import extract_symbols, render_tweet_html
-from src.fetchers import parse_aichainmap_payload, parse_fxtwitter_payload, parse_x_profile
+from src.fetchers import fetch_sources, parse_aichainmap_payload, parse_fxtwitter_payload, parse_x_profile
+from src.http_client import FetchError
 from src.models import Tweet
 from src.state import StateStore, empty_state
 
@@ -113,12 +116,76 @@ class TrackerTests(unittest.TestCase):
             sources=["aichainmap_feed"],
         )
         title, body = render_tweet_html(tweet)
-        self.assertEqual(title, "作者（aleabitoreddit）新推文")
+        self.assertEqual(title, "serenity 新推文")
         self.assertIn("<b>账号：</b>serenity", body)
         self.assertIn("<b>发布时间：</b>2026-08-13 07:08:56", body)
+        self.assertIn("<b>总结：</b>暂未生成", body)
         self.assertNotIn("类型", body)
         self.assertNotIn("来源", body)
         self.assertNotIn("ET", body)
+
+    def test_push_message_contains_glm_summary(self):
+        tweet = Tweet(
+            "124",
+            "jukan05",
+            "2026-08-12T23:08:56Z",
+            "A new post",
+            "https://x.com/jukan05/status/124",
+            summary_cn="核心观点是光模块需求仍然强劲。",
+        )
+        title, body = render_tweet_html(tweet)
+        self.assertEqual(title, "jukan 新推文")
+        self.assertIn("<b>账号：</b>jukan", body)
+        self.assertIn("<b>总结：</b>核心观点是光模块需求仍然强劲。", body)
+
+    @staticmethod
+    def _source_settings():
+        return SimpleNamespace(
+            accounts=("aleabitoreddit",),
+            fetch_x_html=True,
+            fetch_x_detail=False,
+            fetch_aichainmap=True,
+            x_profile_base_url="https://x.com",
+            aichainmap_feed_url="https://serenity-webhook.pages.dev/feed",
+            aichainmap_page_url="https://aichainmap.com/serenity/",
+            user_agent="test",
+            http_timeout=5,
+            http_retries=0,
+        )
+
+    def test_x_primary_skips_aichainmap(self):
+        page = """
+        <article itemType="https://schema.org/SocialMediaPosting">
+          <meta itemProp="identifier" content="x1"/>
+          <meta itemProp="datePublished" content="2026-08-13T01:21:18Z"/>
+          <meta itemProp="url" content="https://x.com/aleabitoreddit/status/x1"/>
+          <meta itemProp="text" content="X primary post"/>
+          <div itemProp="author"><meta itemProp="alternateName" content="aleabitoreddit"/></div>
+        </article>
+        """
+        with patch("src.fetchers.get_text", return_value=page), patch("src.fetchers.get_json") as get_json:
+            tweets, diagnostics = fetch_sources(self._source_settings())
+        self.assertEqual([tweet.id for tweet in tweets], ["x1"])
+        self.assertEqual(diagnostics["aichainmap"], "skipped:x_primary_ok")
+        get_json.assert_not_called()
+
+    def test_aichainmap_is_used_when_x_is_unavailable(self):
+        payload = {
+            "tweets": [
+                {
+                    "id": "backup1",
+                    "url": "https://x.com/aleabitoreddit/status/backup1",
+                    "posted_at": "2026-08-13T01:21:18Z",
+                    "text": "Backup post",
+                }
+            ]
+        }
+        with patch("src.fetchers.get_text", side_effect=FetchError("X blocked")), patch(
+            "src.fetchers.get_json", return_value=payload
+        ):
+            tweets, diagnostics = fetch_sources(self._source_settings())
+        self.assertEqual([tweet.id for tweet in tweets], ["backup1"])
+        self.assertTrue(diagnostics["aichainmap_feed"].startswith("fallback_ok:"))
 
 
 if __name__ == "__main__":

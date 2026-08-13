@@ -51,6 +51,7 @@ class Settings:
     fetch_x_detail: bool
     fetch_aichainmap: bool
     translate_x: bool
+    summarize_x: bool
     include_replies: bool
     max_push_per_day: int
     max_digest_items: int
@@ -79,6 +80,7 @@ class Settings:
             fetch_x_detail=_bool("FETCH_X_DETAIL", True),
             fetch_aichainmap=_bool("FETCH_AICHAINMAP", True),
             translate_x=_bool("TRANSLATE_X", True),
+            summarize_x=_bool("SUMMARIZE_X", True),
             include_replies=_bool("INCLUDE_REPLIES", True),
             max_push_per_day=max(1, _int("MAX_PUSH_PER_DAY", 200)),
             max_digest_items=max(1, _int("MAX_DIGEST_ITEMS", 20)),

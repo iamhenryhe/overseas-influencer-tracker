@@ -22,6 +22,7 @@ class Tweet:
     content_status: str = "complete"
     truncation_reason: str = ""
     sources: list[str] = field(default_factory=list)
+    summary_cn: str = ""
 
     @property
     def key(self) -> str:
@@ -35,6 +36,7 @@ class Tweet:
             "text": self.text,
             "url": self.url,
             "text_cn": self.text_cn,
+            "summary_cn": self.summary_cn,
             "translation_source": self.translation_source,
             "media": self.media,
             "is_reply": self.is_reply,

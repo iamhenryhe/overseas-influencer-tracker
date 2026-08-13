@@ -9,9 +9,9 @@
 
 当前实现不购买 X API、不使用登录 Cookie、不需要梯子或 VPS。采集顺序是：
 
-1. Serenity：读取 `aichainmap.com` 使用的公开实时 feed；feed 失败时读取页面内公开的实时增量数据。
-2. 两个账号：读取公开 X 主页 HTML 中的 Schema.org 帖子字段，并在 X HTML 只给预览时尝试免费公开详情中转源。
-3. 中文：aichainmap 有中文时优先使用；X 英文内容没有中文时，使用智谱 GLM 翻译。翻译失败仍保留英文原文。
+1. 两个账号优先读取公开 X 主页 HTML；X HTML 只给预览时尝试免费公开详情中转源。
+2. 只有 Serenity 的 X 页面被屏蔽、读取失败或完全无法解析时，才使用 `aichainmap` 的公开 feed/页面作为备用，不把两边的重复内容同时合并。
+3. 中文：aichainmap 备用数据有中文时直接使用；X 英文内容没有中文时，使用智谱 GLM 翻译。随后对真正要推送的帖子调用 GLM 生成 1–3 句中文总结。翻译或总结失败仍保留可用内容。
 4. 本地状态：用 `state.json` 保存发布时间水位、已见 ID 和发送记录。
 5. 推送：可选 PushPlus 微信渠道。没有 token 时可用 `--dry-run`，只抓取和打印，不发送。当前脚本每日最多 200 个逻辑推送，与实名微信渠道额度对齐。
 
@@ -49,7 +49,7 @@ python3 -m src.main
 
 GitHub Actions 使用加密 Secret `ZHIPU_API_KEY` 调用智谱对话补全接口；默认模型为 `glm-4.7-flash`。智谱官方建议使用 Bearer 认证并通过环境变量保存 API Key，不能把 Key 提交到仓库。[官方接口文档](https://docs.bigmodel.cn/api-reference/%E6%A8%A1%E5%9E%8B-api/%E5%AF%B9%E8%AF%9D%E8%A1%A5%E5%85%A8)
 
-只翻译最终要推送的 X 帖子，不翻译整个历史 feed。aichainmap 已经提供中文的帖子不会重复调用智谱。
+只翻译和总结最终要推送的帖子，不处理整个历史 feed。aichainmap 已经提供中文的帖子不会重复翻译，但仍会调用一次 GLM 生成总结。工作流通过 `SUMMARIZE_X=true` 开启总结。
 
 ## GitHub Actions
 

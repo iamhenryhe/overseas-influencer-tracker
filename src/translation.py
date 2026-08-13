@@ -24,24 +24,13 @@ def _content_text(value: object) -> str:
     return ""
 
 
-def translate_one(text: str, settings: Settings) -> str:
-    if not settings.zhipu_api_key or not text.strip():
+def _chat(messages: list[dict[str, str]], settings: Settings, *, temperature: float = 0.2) -> str:
+    if not settings.zhipu_api_key:
         return ""
     payload = {
         "model": settings.zhipu_model,
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "你是金融与科技领域的专业翻译。把用户给出的英文 X 帖子完整翻译成自然、准确的简体中文。"
-                    "只输出译文，不要解释，不要总结，不要添加引号或前缀。保留股票代码、公司名、数字、"
-                    "URL、换行和原文语气；不要臆测原文没有表达的观点。若原文以省略号结尾，保留省略号，"
-                    "只翻译可见部分，不要试图补全不可见内容。"
-                ),
-            },
-            {"role": "user", "content": text},
-        ],
-        "temperature": 0.2,
+        "messages": messages,
+        "temperature": temperature,
         "stream": False,
     }
     request = urllib.request.Request(
@@ -62,11 +51,49 @@ def translate_one(text: str, settings: Settings) -> str:
             LOG.warning("Zhipu returned no choices")
             return ""
         message = choices[0].get("message") if isinstance(choices[0], dict) else None
-        translated = _content_text(message.get("content") if isinstance(message, dict) else "")
-        return translated
+        return _content_text(message.get("content") if isinstance(message, dict) else "")
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError, json.JSONDecodeError) as exc:
-        LOG.warning("Zhipu translation failed: %s", exc)
+        LOG.warning("Zhipu request failed: %s", exc)
         return ""
+
+
+def translate_one(text: str, settings: Settings) -> str:
+    if not text.strip():
+        return ""
+    return _chat(
+        [
+            {
+                "role": "system",
+                "content": (
+                    "你是金融与科技领域的专业翻译。把用户给出的英文 X 帖子完整翻译成自然、准确的简体中文。"
+                    "只输出译文，不要解释，不要总结，不要添加引号或前缀。保留股票代码、公司名、数字、"
+                    "URL、换行和原文语气；不要臆测原文没有表达的观点。若原文以省略号结尾，保留省略号，"
+                    "只翻译可见部分，不要试图补全不可见内容。"
+                ),
+            },
+            {"role": "user", "content": text},
+        ],
+        settings,
+    )
+
+
+def summarize_one(text: str, settings: Settings) -> str:
+    if not text.strip():
+        return ""
+    return _chat(
+        [
+            {
+                "role": "system",
+                "content": (
+                    "你是 AI、半导体和股票研究助理。请把这条 X 帖子概括成简洁的中文总结，面向投资者阅读。"
+                    "只输出 1 到 3 句总结，不要使用‘总结：’前缀，不要评价或添加原文没有的信息。"
+                    "优先保留核心主题、关键事实或观点，以及涉及的公司名和股票代码；如果是回复，说明回答了什么问题。"
+                ),
+            },
+            {"role": "user", "content": text},
+        ],
+        settings,
+    )
 
 
 def translate_candidates(tweets: list[Tweet], settings: Settings) -> None:
@@ -81,3 +108,24 @@ def translate_candidates(tweets: list[Tweet], settings: Settings) -> None:
         if translated:
             tweet.text_cn = translated
             tweet.translation_source = f"zhipu:{settings.zhipu_model}"
+
+
+def summarize_candidates(tweets: list[Tweet], settings: Settings) -> None:
+    """Generate summaries only for notifications that will actually be sent."""
+
+    if not settings.summarize_x or not settings.zhipu_api_key:
+        return
+    for tweet in tweets:
+        if tweet.summary_cn:
+            continue
+        source = tweet.text_cn.strip() or tweet.text.strip()
+        summary = summarize_one(source, settings)
+        if summary:
+            tweet.summary_cn = summary
+
+
+def enrich_candidates(tweets: list[Tweet], settings: Settings) -> None:
+    """Translate missing X text, then summarize each outgoing notification."""
+
+    translate_candidates(tweets, settings)
+    summarize_candidates(tweets, settings)

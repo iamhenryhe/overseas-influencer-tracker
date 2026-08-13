@@ -90,6 +90,7 @@ def from_raw(raw: dict[str, Any], *, author: str, source: str) -> Tweet | None:
         text=text,
         url=url,
         text_cn=text_cn,
+        summary_cn=clean_text(raw.get("summary_cn")),
         translation_source=clean_text(raw.get("translation_source"))
         or ("aichainmap" if text_cn and source.startswith("aichainmap") else ""),
         media=_list_urls(raw.get("media")),
@@ -285,6 +286,8 @@ def _dedupe_tweets(tweets: Iterable[Tweet]) -> list[Tweet]:
         if not existing.text_cn and tweet.text_cn:
             existing.text_cn = tweet.text_cn
             existing.translation_source = tweet.translation_source
+        if not existing.summary_cn and tweet.summary_cn:
+            existing.summary_cn = tweet.summary_cn
     return sorted(result.values(), key=lambda item: (item.published_at, item.id), reverse=True)
 
 
@@ -296,33 +299,9 @@ def fetch_sources(settings: Settings) -> tuple[list[Tweet], dict[str, str]]:
     all_tweets: list[Tweet] = []
     diagnostics: dict[str, str] = {}
 
-    if settings.fetch_aichainmap and "aleabitoreddit" in settings.accounts:
-        try:
-            payload = get_json(
-                settings.aichainmap_feed_url,
-                user_agent=settings.user_agent,
-                timeout=settings.http_timeout,
-                retries=settings.http_retries,
-            )
-            feed_tweets = parse_aichainmap_payload(payload, source="aichainmap_feed")
-            all_tweets.extend(feed_tweets)
-            diagnostics["aichainmap_feed"] = f"ok:{len(feed_tweets)}"
-        except FetchError as exc:
-            diagnostics["aichainmap_feed"] = f"error:{exc}"
-            LOG.warning("aichainmap feed unavailable: %s", exc)
-            try:
-                page = get_text(
-                    settings.aichainmap_page_url,
-                    user_agent=settings.user_agent,
-                    timeout=settings.http_timeout,
-                    retries=settings.http_retries,
-                )
-                page_tweets = parse_aichainmap_page(page)
-                all_tweets.extend(page_tweets)
-                diagnostics["aichainmap_page"] = f"ok:{len(page_tweets)}"
-            except FetchError as page_exc:
-                diagnostics["aichainmap_page"] = f"error:{page_exc}"
-                LOG.warning("aichainmap page fallback unavailable: %s", page_exc)
+    # X is the primary source. Keep a per-account availability flag so the
+    # Serenity mirror is only touched when the direct X page is unavailable.
+    x_available: dict[str, bool] = {}
 
     if settings.fetch_x_html:
         for account in settings.accounts:
@@ -354,11 +333,51 @@ def fetch_sources(settings: Settings) -> tuple[list[Tweet], dict[str, str]]:
                         except FetchError as exc:
                             LOG.info("X detail fallback unavailable for %s/%s: %s", account, tweet.id, exc)
                     account_tweets = merge_tweets(account_tweets + detail_tweets)
-                all_tweets.extend(account_tweets)
-                diagnostics[f"x_html:{account}"] = f"ok:{len(account_tweets)}"
+                if account_tweets:
+                    x_available[account] = True
+                    all_tweets.extend(account_tweets)
+                    diagnostics[f"x_html:{account}"] = f"ok:{len(account_tweets)}"
+                else:
+                    x_available[account] = False
+                    diagnostics[f"x_html:{account}"] = "error:no_posts_parsed"
+                    LOG.warning("X public profile returned no parseable posts for %s", account)
             except FetchError as exc:
+                x_available[account] = False
                 diagnostics[f"x_html:{account}"] = f"error:{exc}"
                 LOG.warning("X public profile unavailable for %s: %s", account, exc)
+
+    # aichainmap is a backup for Serenity only. If X returned usable Serenity
+    # posts, do not merge the mirror's copy into the primary result set.
+    if settings.fetch_aichainmap and "aleabitoreddit" in settings.accounts:
+        if x_available.get("aleabitoreddit"):
+            diagnostics["aichainmap"] = "skipped:x_primary_ok"
+        else:
+            try:
+                payload = get_json(
+                    settings.aichainmap_feed_url,
+                    user_agent=settings.user_agent,
+                    timeout=settings.http_timeout,
+                    retries=settings.http_retries,
+                )
+                feed_tweets = parse_aichainmap_payload(payload, source="aichainmap_feed")
+                all_tweets.extend(feed_tweets)
+                diagnostics["aichainmap_feed"] = f"fallback_ok:{len(feed_tweets)}"
+            except FetchError as exc:
+                diagnostics["aichainmap_feed"] = f"error:{exc}"
+                LOG.warning("aichainmap feed unavailable: %s", exc)
+                try:
+                    page = get_text(
+                        settings.aichainmap_page_url,
+                        user_agent=settings.user_agent,
+                        timeout=settings.http_timeout,
+                        retries=settings.http_retries,
+                    )
+                    page_tweets = parse_aichainmap_page(page)
+                    all_tweets.extend(page_tweets)
+                    diagnostics["aichainmap_page"] = f"fallback_ok:{len(page_tweets)}"
+                except FetchError as page_exc:
+                    diagnostics["aichainmap_page"] = f"error:{page_exc}"
+                    LOG.warning("aichainmap page fallback unavailable: %s", page_exc)
 
     merged = merge_tweets(all_tweets)
     if not merged and diagnostics:

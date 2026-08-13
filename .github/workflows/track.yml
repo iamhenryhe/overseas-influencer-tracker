@@ -67,12 +67,26 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          other_active_runs="$(gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/track.yml/runs?per_page=50" \
+            --jq '.workflow_runs[] | select(.id != '"$GITHUB_RUN_ID"' and (.status == "queued" or .status == "in_progress")) | .id' \
+            || true)"
+          if [ -n "$other_active_runs" ]; then
+            echo "another tracker run is already queued or running: $other_active_runs"
+            echo "this duplicate starter exits without polling"
+            exit 0
+          fi
+
           persist_state() {
             git add state.json || return 1
-            if git diff --cached --quiet; then
+            if ! git diff --cached --quiet; then
+              git commit -m "chore: update tracker state" || return 1
+            fi
+
+            if [ "$(git rev-list --count origin/main..HEAD)" -eq 0 ]; then
               return 0
             fi
-            git commit -m "chore: update tracker state" || return 1
+
             for attempt in 1 2 3; do
               if git push origin HEAD:main; then
                 return 0

@@ -63,6 +63,8 @@ GitHub Actions 使用加密 Secret `ZHIPU_API_KEY` 调用智谱 GLM Coding Plan�
 
 正式工作流开启 `REQUIRE_AI_ENRICHMENT=true`：智谱翻译或总结失败时，本轮不发送、不写入已发送状态，下一分钟自动重试；智谱接口错误会在 Actions 日志中记录 HTTP 状态和 API 错误信息。
 
+`Tracker watchdog` 工作流每 5 分钟检查一次 `monitor_heartbeat.json`：超过 15 分钟没有心跳、某次检查报错或跟踪任务停止时，通过 PushPlus 发送报警；恢复后发送一条恢复通知。同一故障只报警一次，避免重复打扰。
+
 手动运行时可以选择 `push_latest` 做端到端测试，并把 `limit` 设为 `2`；日常定时运行默认使用 `latest`，只建立首次基线并等待新帖子。
 
 ## 重要边界

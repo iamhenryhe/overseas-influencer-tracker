@@ -62,6 +62,7 @@ jobs:
           MAX_PUSH_PER_DAY: "200"
           POLL_INTERVAL_SECONDS: "60"
           WATCH_ITERATIONS: "300"
+          HEARTBEAT_EVERY_ITERATIONS: "5"
           GH_TOKEN: ${{ github.token }}
         run: |
           set -uo pipefail
@@ -79,8 +80,14 @@ jobs:
             exit 0
           fi
 
+          python -m src.heartbeat \
+            --run-id "$GITHUB_RUN_ID" \
+            --iteration 0 \
+            --status starting \
+            --exit-code 0
+
           persist_state() {
-            git add state.json || return 1
+            git add state.json monitor_heartbeat.json || return 1
             if ! git diff --cached --quiet; then
               git commit -m "chore: update tracker state" || return 1
             fi
@@ -114,6 +121,20 @@ jobs:
               echo "tracker returned status ${tracker_status}; watcher will continue"
             fi
 
+            if [ "$iteration" -eq 1 ] || [ $((iteration % HEARTBEAT_EVERY_ITERATIONS)) -eq 0 ]; then
+              heartbeat_status="ok"
+              if [ "$tracker_status" -ne 0 ]; then
+                heartbeat_status="error"
+              fi
+              if ! python -m src.heartbeat \
+                --run-id "$GITHUB_RUN_ID" \
+                --iteration "$iteration" \
+                --status "$heartbeat_status" \
+                --exit-code "$tracker_status"; then
+                echo "warning: heartbeat could not be written"
+              fi
+            fi
+
             if ! persist_state; then
               echo "warning: state could not be pushed this iteration"
             fi
@@ -124,6 +145,13 @@ jobs:
               sleep "$sleep_for"
             fi
           done
+
+          python -m src.heartbeat \
+            --run-id "$GITHUB_RUN_ID" \
+            --iteration "$WATCH_ITERATIONS" \
+            --status finished \
+            --exit-code 0 || true
+          persist_state || echo "warning: final heartbeat could not be pushed"
 
           echo "watch window complete; requesting the next watcher"
           gh api --method POST "/repos/${GITHUB_REPOSITORY}/dispatches" \

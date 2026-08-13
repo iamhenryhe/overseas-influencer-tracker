@@ -1,0 +1,67 @@
+name: Tracker watchdog
+
+on:
+  schedule:
+    # GitHub's shortest scheduled-workflow interval is five minutes.
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: free-public-source-watchdog
+  cancel-in-progress: true
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check heartbeat and notify
+        env:
+          PUSHPLUS_TOKENS: ${{ secrets.PUSHPLUS_TOKENS }}
+          PUSHPLUS_TOPIC: ${{ secrets.PUSHPLUS_TOPIC }}
+          HEARTBEAT_STALE_SECONDS: "900"
+        run: |
+          set -uo pipefail
+          set +e
+          python -m src.watchdog
+          watchdog_status=$?
+          set -e
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add watchdog_state.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update tracker watchdog state"
+            pushed=0
+            for attempt in 1 2 3; do
+              if git push origin HEAD:main; then
+                pushed=1
+                break
+              fi
+              git fetch origin main || continue
+              if ! git rebase origin/main; then
+                git rebase --abort || true
+                break
+              fi
+            done
+            if [ "$pushed" -ne 1 ]; then
+              echo "warning: watchdog state could not be pushed"
+            fi
+          fi
+
+          if [ "$watchdog_status" -ne 0 ]; then
+            exit "$watchdog_status"
+          fi

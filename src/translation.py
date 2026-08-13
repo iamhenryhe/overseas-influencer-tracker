@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 import urllib.error
 import urllib.request
 
@@ -9,7 +10,6 @@ from .config import Settings
 from .models import Tweet
 
 LOG = logging.getLogger(__name__)
-ZHIPU_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 
 
 def _content_text(value: object) -> str:
@@ -24,17 +24,48 @@ def _content_text(value: object) -> str:
     return ""
 
 
-def _chat(messages: list[dict[str, str]], settings: Settings, *, temperature: float = 0.2) -> str:
+def _error_body(exc: urllib.error.HTTPError) -> str:
+    try:
+        body = exc.read().decode("utf-8", errors="replace").strip()
+    except OSError:
+        return ""
+    if not body:
+        return ""
+    try:
+        value = json.loads(body)
+    except json.JSONDecodeError:
+        return body[:500]
+    if isinstance(value, dict):
+        error = value.get("error")
+        if isinstance(error, dict):
+            code = error.get("code", "")
+            message = error.get("message", "")
+            return f"code={code} message={message}".strip()
+        message = value.get("message")
+        if message:
+            return str(message)[:500]
+    return body[:500]
+
+
+def _chat(
+    messages: list[dict[str, str]],
+    settings: Settings,
+    *,
+    temperature: float = 0.2,
+    max_tokens: int = 1024,
+) -> str:
     if not settings.zhipu_api_key:
+        LOG.error("Zhipu API key is missing")
         return ""
     payload = {
         "model": settings.zhipu_model,
         "messages": messages,
         "temperature": temperature,
+        "max_tokens": max_tokens,
         "stream": False,
     }
     request = urllib.request.Request(
-        ZHIPU_URL,
+        settings.zhipu_api_url,
         data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
         headers={
             "Authorization": f"Bearer {settings.zhipu_api_key}",
@@ -43,18 +74,54 @@ def _chat(messages: list[dict[str, str]], settings: Settings, *, temperature: fl
         },
         method="POST",
     )
-    try:
-        with urllib.request.urlopen(request, timeout=settings.http_timeout) as response:
-            result = json.loads(response.read().decode("utf-8", errors="replace"))
-        choices = result.get("choices") if isinstance(result, dict) else None
-        if not isinstance(choices, list) or not choices:
-            LOG.warning("Zhipu returned no choices")
-            return ""
-        message = choices[0].get("message") if isinstance(choices[0], dict) else None
-        return _content_text(message.get("content") if isinstance(message, dict) else "")
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError, json.JSONDecodeError) as exc:
-        LOG.warning("Zhipu request failed: %s", exc)
-        return ""
+    attempts = max(1, settings.http_retries + 1)
+    for attempt in range(1, attempts + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=settings.http_timeout) as response:
+                result = json.loads(response.read().decode("utf-8", errors="replace"))
+            if not isinstance(result, dict):
+                LOG.error("Zhipu returned an unexpected response type: %s", type(result).__name__)
+                return ""
+            if isinstance(result.get("error"), dict):
+                error = result["error"]
+                LOG.warning(
+                    "Zhipu API returned an error: code=%s message=%s",
+                    error.get("code", ""),
+                    error.get("message", ""),
+                )
+                return ""
+            choices = result.get("choices")
+            if not isinstance(choices, list) or not choices:
+                LOG.warning("Zhipu returned no choices: request_id=%s", result.get("request_id", ""))
+                return ""
+            message = choices[0].get("message") if isinstance(choices[0], dict) else None
+            content = _content_text(message.get("content") if isinstance(message, dict) else "")
+            if not content:
+                LOG.warning(
+                    "Zhipu returned empty content: request_id=%s finish_reason=%s",
+                    result.get("request_id", ""),
+                    choices[0].get("finish_reason", "") if isinstance(choices[0], dict) else "",
+                )
+            return content
+        except urllib.error.HTTPError as exc:
+            detail = _error_body(exc)
+            retryable = exc.code == 429 or 500 <= exc.code < 600
+            LOG.warning(
+                "Zhipu HTTP error status=%s retryable=%s attempt=%s/%s detail=%s",
+                exc.code,
+                retryable,
+                attempt,
+                attempts,
+                detail or str(exc),
+            )
+            if not retryable or attempt >= attempts:
+                return ""
+        except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+            LOG.warning("Zhipu request failed attempt=%s/%s: %s", attempt, attempts, exc)
+            if attempt >= attempts:
+                return ""
+        time.sleep(min(8, 1.5 ** (attempt - 1)))
+    return ""
 
 
 def translate_one(text: str, settings: Settings) -> str:
@@ -74,6 +141,7 @@ def translate_one(text: str, settings: Settings) -> str:
             {"role": "user", "content": text},
         ],
         settings,
+        max_tokens=2048,
     )
 
 
@@ -93,14 +161,19 @@ def summarize_one(text: str, settings: Settings) -> str:
             {"role": "user", "content": text},
         ],
         settings,
+        max_tokens=512,
     )
 
 
-def translate_candidates(tweets: list[Tweet], settings: Settings) -> None:
+def translate_candidates(tweets: list[Tweet], settings: Settings) -> bool:
     """Translate only notifications that will actually be sent, never the whole feed."""
 
-    if not settings.translate_x or not settings.zhipu_api_key:
-        return
+    if not settings.translate_x:
+        return True
+    if not settings.zhipu_api_key:
+        LOG.error("Translation is enabled but Zhipu API key is missing")
+        return False
+    success = True
     for tweet in tweets:
         if tweet.text_cn or not tweet.text.strip():
             continue
@@ -108,13 +181,21 @@ def translate_candidates(tweets: list[Tweet], settings: Settings) -> None:
         if translated:
             tweet.text_cn = translated
             tweet.translation_source = f"zhipu:{settings.zhipu_model}"
+        else:
+            LOG.error("Translation failed for %s; it will not be sent yet", tweet.key)
+            success = False
+    return success
 
 
-def summarize_candidates(tweets: list[Tweet], settings: Settings) -> None:
+def summarize_candidates(tweets: list[Tweet], settings: Settings) -> bool:
     """Generate summaries only for notifications that will actually be sent."""
 
-    if not settings.summarize_x or not settings.zhipu_api_key:
-        return
+    if not settings.summarize_x:
+        return True
+    if not settings.zhipu_api_key:
+        LOG.error("Summarization is enabled but Zhipu API key is missing")
+        return False
+    success = True
     for tweet in tweets:
         if tweet.summary_cn:
             continue
@@ -122,10 +203,15 @@ def summarize_candidates(tweets: list[Tweet], settings: Settings) -> None:
         summary = summarize_one(source, settings)
         if summary:
             tweet.summary_cn = summary
+        else:
+            LOG.error("Summarization failed for %s; it will not be sent yet", tweet.key)
+            success = False
+    return success
 
 
-def enrich_candidates(tweets: list[Tweet], settings: Settings) -> None:
+def enrich_candidates(tweets: list[Tweet], settings: Settings) -> bool:
     """Translate missing X text, then summarize each outgoing notification."""
 
-    translate_candidates(tweets, settings)
-    summarize_candidates(tweets, settings)
+    translated = translate_candidates(tweets, settings)
+    summarized = summarize_candidates(tweets, settings)
+    return translated and summarized

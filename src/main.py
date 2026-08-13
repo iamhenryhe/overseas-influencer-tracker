@@ -132,7 +132,13 @@ def run(args: argparse.Namespace) -> int:
             return 0
 
         # Translate only posts that will actually be delivered.
-        enrich_candidates(selected, settings)
+        enrichment_ok = enrich_candidates(selected, settings)
+        if settings.require_ai_enrichment and not enrichment_ok:
+            LOG.error(
+                "AI enrichment is incomplete; leaving %s candidate(s) unclaimed so the next poll can retry",
+                len(selected),
+            )
+            return 1
 
         # Claim before sending. This deliberately favors no duplicate notifications over
         # automatic re-delivery after an ambiguous network failure.

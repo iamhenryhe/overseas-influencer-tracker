@@ -46,12 +46,14 @@ class Settings:
     pushplus_tokens: tuple[str, ...]
     pushplus_topic: str
     zhipu_api_key: str
+    zhipu_api_url: str
     zhipu_model: str
     fetch_x_html: bool
     fetch_x_detail: bool
     fetch_aichainmap: bool
     translate_x: bool
     summarize_x: bool
+    require_ai_enrichment: bool
     include_replies: bool
     max_push_per_day: int
     max_digest_items: int
@@ -75,12 +77,17 @@ class Settings:
             pushplus_tokens=_tokens(),
             pushplus_topic=os.getenv("PUSHPLUS_TOPIC", "").strip(),
             zhipu_api_key=os.getenv("ZHIPU_API_KEY", "").strip(),
-            zhipu_model=os.getenv("ZHIPU_MODEL", "glm-4.7-flash").strip() or "glm-4.7-flash",
+            zhipu_api_url=os.getenv(
+                "ZHIPU_API_URL",
+                "https://open.bigmodel.cn/api/coding/paas/v4/chat/completions",
+            ).strip(),
+            zhipu_model=os.getenv("ZHIPU_MODEL", "glm-5.2").strip() or "glm-5.2",
             fetch_x_html=_bool("FETCH_X_HTML", True),
             fetch_x_detail=_bool("FETCH_X_DETAIL", True),
             fetch_aichainmap=_bool("FETCH_AICHAINMAP", True),
             translate_x=_bool("TRANSLATE_X", True),
             summarize_x=_bool("SUMMARIZE_X", True),
+            require_ai_enrichment=_bool("REQUIRE_AI_ENRICHMENT", False),
             include_replies=_bool("INCLUDE_REPLIES", True),
             max_push_per_day=max(1, _int("MAX_PUSH_PER_DAY", 200)),
             max_digest_items=max(1, _int("MAX_DIGEST_ITEMS", 20)),

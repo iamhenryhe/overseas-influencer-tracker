@@ -52,9 +52,11 @@ jobs:
           PUSHPLUS_TOKENS: ${{ secrets.PUSHPLUS_TOKENS }}
           PUSHPLUS_TOPIC: ${{ secrets.PUSHPLUS_TOPIC }}
           ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
-          ZHIPU_MODEL: glm-4.7-flash
+          ZHIPU_API_URL: https://open.bigmodel.cn/api/coding/paas/v4/chat/completions
+          ZHIPU_MODEL: glm-5.2
           TRANSLATE_X: "true"
           SUMMARIZE_X: "true"
+          REQUIRE_AI_ENRICHMENT: "true"
           FETCH_X_DETAIL: "true"
           BOOTSTRAP_MODE: ${{ inputs.bootstrap_mode || 'latest' }}
           MAX_PUSH_PER_DAY: "200"

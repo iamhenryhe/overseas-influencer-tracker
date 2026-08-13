@@ -47,7 +47,7 @@ python3 -m src.main
 
 ## 智谱翻译配置
 
-GitHub Actions 使用加密 Secret `ZHIPU_API_KEY` 调用智谱对话补全接口；默认模型为 `glm-4.7-flash`。智谱官方建议使用 Bearer 认证并通过环境变量保存 API Key，不能把 Key 提交到仓库。[官方接口文档](https://docs.bigmodel.cn/api-reference/%E6%A8%A1%E5%9E%8B-api/%E5%AF%B9%E8%AF%9D%E8%A1%A5%E5%85%A8)
+GitHub Actions 使用加密 Secret `ZHIPU_API_KEY` 调用智谱 GLM Coding Plan；端点为 `https://open.bigmodel.cn/api/coding/paas/v4/chat/completions`，默认模型为 `glm-5.2`。Coding Plan 必须使用专用端点，不能使用普通的 `/api/paas/v4/` 端点。智谱官方要求使用 Bearer 认证并建议通过环境变量保存 API Key，不能把 Key 提交到仓库。[Coding Plan 端点说明](https://docs.bigmodel.cn/cn/coding-plan/quick-start)
 
 只翻译和总结最终要推送的帖子，不处理整个历史 feed。aichainmap 已经提供中文的帖子不会重复翻译，但仍会调用一次 GLM 生成总结。工作流通过 `SUMMARIZE_X=true` 开启总结。
 
@@ -60,6 +60,8 @@ GitHub Actions 使用加密 Secret `ZHIPU_API_KEY` 调用智谱对话补全接�
 - 可选 `PUSHPLUS_TOPIC`：PushPlus 群组编码。
 
 工作流启动后会在 GitHub Runner 上持续监控约 5 小时，每 60 秒抓取一次；窗口结束时自动接力启动下一轮。另有每小时一次的 `schedule` 作为异常恢复兜底。这样不依赖每 5 分钟创建一个短任务，但 GitHub 高负载或平台故障时仍可能影响任务启动。工作流会把 `state.json` 回写到仓库，每日最多 200 个逻辑推送。
+
+正式工作流开启 `REQUIRE_AI_ENRICHMENT=true`：智谱翻译或总结失败时，本轮不发送、不写入已发送状态，下一分钟自动重试；智谱接口错误会在 Actions 日志中记录 HTTP 状态和 API 错误信息。
 
 手动运行时可以选择 `push_latest` 做端到端测试，并把 `limit` 设为 `2`；日常定时运行默认使用 `latest`，只建立首次基线并等待新帖子。
 

@@ -2,8 +2,9 @@ name: Free public-source tracker
 
 on:
   schedule:
-    # Five-minute cadence, offset from :00 to reduce top-of-hour contention.
-    - cron: "2-59/5 * * * *"
+    # Hourly fallback starter. The active watcher polls once per minute and
+    # chains the next run itself; this schedule recovers a stopped watcher.
+    - cron: "37 * * * *"
   workflow_dispatch:
     inputs:
       bootstrap_mode:
@@ -19,6 +20,8 @@ on:
         required: true
         default: "0"
         type: string
+  repository_dispatch:
+    types: [tracker_keepalive]
 
 permissions:
   contents: write
@@ -30,7 +33,8 @@ concurrency:
 jobs:
   track:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Keep below GitHub-hosted runners' six-hour job limit.
+    timeout-minutes: 345
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -42,7 +46,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Fetch, deduplicate, and notify
+      - name: Monitor continuously
         env:
           TARGET_ACCOUNTS: jukan05,aleabitoreddit
           PUSHPLUS_TOKENS: ${{ secrets.PUSHPLUS_TOKENS }}
@@ -54,17 +58,60 @@ jobs:
           FETCH_X_DETAIL: "true"
           BOOTSTRAP_MODE: ${{ inputs.bootstrap_mode || 'latest' }}
           MAX_PUSH_PER_DAY: "200"
-        run: python -m src.main --limit "${{ inputs.limit || '0' }}"
-
-      - name: Persist state
-        if: ${{ success() }}
+          POLL_INTERVAL_SECONDS: "60"
+          WATCH_ITERATIONS: "300"
+          GH_TOKEN: ${{ github.token }}
         run: |
+          set -uo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add state.json
-          if git diff --cached --quiet; then
-            echo "state unchanged"
-          else
-            git commit -m "chore: update tracker state"
-            git push
-          fi
+
+          persist_state() {
+            git add state.json || return 1
+            if git diff --cached --quiet; then
+              return 0
+            fi
+            git commit -m "chore: update tracker state" || return 1
+            for attempt in 1 2 3; do
+              if git push origin HEAD:main; then
+                return 0
+              fi
+              git fetch origin main || continue
+              if ! git rebase origin/main; then
+                git rebase --abort || true
+                return 1
+              fi
+            done
+            return 1
+          }
+
+          for iteration in $(seq 1 "$WATCH_ITERATIONS"); do
+            cycle_started=$(date +%s)
+            echo "watch iteration ${iteration}/${WATCH_ITERATIONS} started at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
+            set +e
+            python -m src.main --limit "${{ inputs.limit || '0' }}"
+            tracker_status=$?
+            set -e
+            if [ "$tracker_status" -ne 0 ]; then
+              echo "tracker returned status ${tracker_status}; watcher will continue"
+            fi
+
+            if ! persist_state; then
+              echo "warning: state could not be pushed this iteration"
+            fi
+
+            elapsed=$(( $(date +%s) - cycle_started ))
+            sleep_for=$(( POLL_INTERVAL_SECONDS - elapsed ))
+            if [ "$sleep_for" -gt 0 ] && [ "$iteration" -lt "$WATCH_ITERATIONS" ]; then
+              sleep "$sleep_for"
+            fi
+          done
+
+          echo "watch window complete; requesting the next watcher"
+          gh api --method POST "/repos/${GITHUB_REPOSITORY}/dispatches" \
+            -H "Accept: application/vnd.github+json" \
+            --input - <<'JSON'
+          {"event_type":"tracker_keepalive","client_payload":{"reason":"watch_window_complete"}}
+          JSON

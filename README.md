@@ -59,7 +59,7 @@ GitHub Actions 使用加密 Secret `ZHIPU_API_KEY` 调用智谱对话补全接�
 - `ZHIPU_API_KEY`：智谱 API Key，用于 X 英文内容翻译；
 - 可选 `PUSHPLUS_TOPIC`：PushPlus 群组编码。
 
-工作流每 5 分钟执行一次，也可以在 Actions 页面手动运行。GitHub 的 `schedule` 最短间隔就是 5 分钟，且高负载时可能延迟；工作流会把 `state.json` 回写到仓库。工作流每日最多 200 个逻辑推送。
+工作流启动后会在 GitHub Runner 上持续监控约 5 小时，每 60 秒抓取一次；窗口结束时自动接力启动下一轮。另有每小时一次的 `schedule` 作为异常恢复兜底。这样不依赖每 5 分钟创建一个短任务，但 GitHub 高负载或平台故障时仍可能影响任务启动。工作流会把 `state.json` 回写到仓库，每日最多 200 个逻辑推送。
 
 手动运行时可以选择 `push_latest` 做端到端测试，并把 `limit` 设为 `2`；日常定时运行默认使用 `latest`，只建立首次基线并等待新帖子。
 

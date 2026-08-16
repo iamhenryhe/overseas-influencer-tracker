@@ -239,7 +239,8 @@
     "jukan05:2088750717490340112",
     "jukan05:2088797214873133358",
     "aleabitoreddit:2088835269013483637",
-    "aleabitoreddit:2088850910529323315"
+    "aleabitoreddit:2088850910529323315",
+    "aleabitoreddit:2088900339974246545"
   ],
   "claims": {
     "jukan05:2087711056470987222": {
@@ -711,15 +712,29 @@
       "results": {
         "recipient_1": true
       }
+    },
+    "aleabitoreddit:2088900339974246545": {
+      "claimed_at": "2026-08-16T08:07:50.086333Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_html"
+      ],
+      "delivered_at": "2026-08-16T08:07:51.003199Z",
+      "results": {
+        "recipient_1": true
+      }
     }
   },
   "last_published_at": {
     "jukan05": "2026-08-16T01:17:18Z",
-    "aleabitoreddit": "2026-08-16T04:50:40Z"
+    "aleabitoreddit": "2026-08-16T08:07:05Z"
   },
   "daily_push": {
     "date": "2026-08-16",
-    "count": 3
+    "count": 4
   },
-  "updated_at": "2026-08-16T04:51:27.773046Z"
+  "updated_at": "2026-08-16T08:07:51.003226Z"
 }

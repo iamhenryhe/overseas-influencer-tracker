@@ -1,8 +1,7 @@
 {
   "version": 1,
-  "alert_active": true,
-  "alert_kind": "check_failed",
+  "alert_active": false,
+  "alert_kind": "",
   "alerted_at": "2026-08-20T18:56:22.291696Z",
-  "recovered_at": "2026-08-20T03:34:42.808302Z",
-  "message": "跟踪器仍在运行，但第 50 次检查失败；请查看 GitHub Actions 日志。"
+  "recovered_at": "2026-08-21T00:26:52.355234Z"
 }

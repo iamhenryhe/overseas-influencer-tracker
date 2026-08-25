@@ -1,8 +1,8 @@
 {
   "version": 1,
   "alert_active": true,
-  "alert_kind": "stale",
-  "alerted_at": "2026-08-25T14:05:16.708889Z",
+  "alert_kind": "check_failed",
+  "alerted_at": "2026-08-25T17:56:31.178462Z",
   "recovered_at": "2026-08-25T13:08:50.009677Z",
-  "message": "已经 69 分钟没有收到心跳，跟踪器可能停止或卡住。"
+  "message": "跟踪器仍在运行，但第 1 次检查失败；请查看 GitHub Actions 日志。"
 }

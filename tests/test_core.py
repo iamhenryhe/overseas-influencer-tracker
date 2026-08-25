@@ -5,7 +5,13 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from src.content import extract_symbols, render_tweet_html
-from src.fetchers import fetch_sources, parse_aichainmap_payload, parse_fxtwitter_payload, parse_x_profile
+from src.fetchers import (
+    fetch_sources,
+    hydrate_x_details,
+    parse_aichainmap_payload,
+    parse_fxtwitter_payload,
+    parse_x_profile,
+)
 from src.http_client import FetchError
 from src.models import Tweet
 from src.state import StateStore, empty_state
@@ -104,6 +110,42 @@ class TrackerTests(unittest.TestCase):
         self.assertEqual(tweet.published_at, "2026-08-13T01:21:18Z")
         self.assertEqual(tweet.content_status, "complete")
 
+    def test_long_anonymous_x_preview_is_hydrated_by_fxtwitter(self):
+        preview = "P" * 277
+        full_text = preview + " full Note Tweet text"
+        page = f"""
+        <article itemType="https://schema.org/SocialMediaPosting">
+          <meta itemProp="identifier" content="long1"/>
+          <meta itemProp="datePublished" content="2026-08-13T01:21:18Z"/>
+          <meta itemProp="url" content="https://x.com/jukan05/status/long1"/>
+          <meta itemProp="text" content="{preview}"/>
+          <div itemProp="author"><meta itemProp="alternateName" content="jukan05"/></div>
+        </article>
+        """
+        settings = self._source_settings()
+        settings.accounts = ("jukan05",)
+        settings.fetch_x_detail = True
+        with patch("src.fetchers.get_text", return_value=page), patch("src.fetchers.get_json") as get_json:
+            tweets, _ = fetch_sources(settings)
+            get_json.assert_not_called()
+            get_json.return_value = {
+                "tweet": {
+                    "id": "long1",
+                    "url": "https://x.com/jukan05/status/long1",
+                    "text": full_text,
+                    "created_at": "Thu Aug 13 01:21:18 +0000 2026",
+                    "replying_to": None,
+                    "quote": None,
+                    "media": {"all": []},
+                }
+            }
+            self.assertEqual(tweets[0].content_status, "truncated")
+            hydrated = hydrate_x_details(tweets, settings)
+
+        self.assertEqual(hydrated[0].text, full_text)
+        self.assertEqual(hydrated[0].content_status, "complete")
+        self.assertIn("x_detail:fxtwitter", hydrated[0].sources)
+
     def test_push_message_format(self):
         tweet = Tweet(
             "123",
@@ -150,6 +192,7 @@ class TrackerTests(unittest.TestCase):
             fetch_x_detail=False,
             fetch_aichainmap=True,
             x_profile_base_url="https://x.com",
+            x_detail_base_url="https://api.fxtwitter.com/status",
             aichainmap_feed_url="https://serenity-webhook.pages.dev/feed",
             aichainmap_page_url="https://aichainmap.com/serenity/",
             user_agent="test",

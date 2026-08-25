@@ -57,6 +57,7 @@ jobs:
           TRANSLATE_X: "true"
           SUMMARIZE_X: "true"
           REQUIRE_AI_ENRICHMENT: "true"
+          REQUIRE_X_FULL_TEXT: "true"
           FETCH_X_DETAIL: "true"
           BOOTSTRAP_MODE: ${{ inputs.bootstrap_mode || 'latest' }}
           MAX_PUSH_PER_DAY: "200"

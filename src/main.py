@@ -6,7 +6,7 @@ import sys
 
 from .config import Settings
 from .content import render_digest_html, render_tweet_html
-from .fetchers import fetch_sources
+from .fetchers import fetch_sources, hydrate_x_details
 from .http_client import FetchError
 from .push import send_to_all
 from .state import StateStore
@@ -90,6 +90,9 @@ def run(args: argparse.Namespace) -> int:
                 LOG.info("no new tweets")
             return 0
 
+        if dry_run:
+            candidates = hydrate_x_details(candidates, settings)
+
         for tweet in candidates:
             LOG.info(
                 "candidate @%s %s %s text=%s",
@@ -131,6 +134,20 @@ def run(args: argparse.Namespace) -> int:
             LOG.warning("not enough daily PushPlus budget for the next notification")
             return 0
 
+        selected = hydrate_x_details(selected, settings)
+        incomplete_x = [
+            tweet
+            for tweet in selected
+            if tweet.content_status != "complete" and _has_x_html_source(tweet)
+        ]
+        if settings.require_x_full_text and incomplete_x:
+            LOG.error(
+                "X full text is unavailable for %s candidate(s); leaving them unclaimed for retry: %s",
+                len(incomplete_x),
+                [tweet.key for tweet in incomplete_x],
+            )
+            return 1
+
         # Translate only posts that will actually be delivered.
         enrichment_ok = enrich_candidates(selected, settings)
         if settings.require_ai_enrichment and not enrichment_ok:
@@ -158,6 +175,10 @@ def run(args: argparse.Namespace) -> int:
         store.record_push_attempt(state, push_units)
         store.save(state)
     return 0
+
+
+def _has_x_html_source(tweet) -> bool:
+    return any(source == "x_html" or source.startswith("x_html:") for source in tweet.sources)
 
 
 def main() -> int:

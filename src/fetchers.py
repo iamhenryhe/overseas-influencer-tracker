@@ -73,7 +73,11 @@ def from_raw(raw: dict[str, Any], *, author: str, source: str) -> Tweet | None:
     if (
         content_status == "complete"
         and source.startswith("x_html")
-        and (text.endswith("…") or text.endswith("..."))
+        # Anonymous X HTML can silently stop in the middle of a long-form
+        # Note Tweet without adding an ellipsis (for example, at 277 chars).
+        # Treat long public previews as incomplete until the detail relay
+        # confirms the full text.
+        and (text.endswith("…") or text.endswith("...") or len(text) >= 260)
     ):
         content_status = "truncated"
         truncation_reason = "x_public_html_preview"
@@ -295,6 +299,46 @@ def merge_tweets(tweets: Iterable[Tweet]) -> list[Tweet]:
     return _dedupe_tweets(tweets)
 
 
+def _has_source(tweet: Tweet, prefix: str) -> bool:
+    return any(source == prefix or source.startswith(f"{prefix}:") for source in tweet.sources)
+
+
+def hydrate_x_details(tweets: list[Tweet], settings: Settings) -> list[Tweet]:
+    """Use FxTwitter as the default detail source for outgoing X posts.
+
+    Profile HTML is used for cheap discovery. Detail requests happen only
+    after state filtering, so a five-hour watcher does not repeatedly request
+    the same old posts every minute.
+    """
+
+    if not settings.fetch_x_detail:
+        return tweets
+
+    hydrated: list[Tweet] = []
+    for tweet in tweets:
+        if not _has_source(tweet, "x_html") or _has_source(tweet, "x_detail"):
+            hydrated.append(tweet)
+            continue
+
+        detail_url = f"{settings.x_detail_base_url.rstrip('/')}/{tweet.id}"
+        try:
+            detail_payload = get_json(
+                detail_url,
+                user_agent=settings.user_agent,
+                timeout=settings.http_timeout,
+                retries=settings.http_retries,
+            )
+            detail_tweet = parse_fxtwitter_payload(detail_payload, author=tweet.author)
+            if detail_tweet:
+                hydrated.extend(merge_tweets([tweet, detail_tweet]))
+                continue
+            LOG.info("X detail returned no usable tweet for %s/%s", tweet.author, tweet.id)
+        except FetchError as exc:
+            LOG.info("X detail unavailable for %s/%s: %s", tweet.author, tweet.id, exc)
+        hydrated.append(tweet)
+    return _dedupe_tweets(hydrated)
+
+
 def fetch_sources(settings: Settings) -> tuple[list[Tweet], dict[str, str]]:
     all_tweets: list[Tweet] = []
     diagnostics: dict[str, str] = {}
@@ -314,25 +358,6 @@ def fetch_sources(settings: Settings) -> tuple[list[Tweet], dict[str, str]]:
                     retries=settings.http_retries,
                 )
                 account_tweets = parse_x_profile(page, account)
-                if settings.fetch_x_detail:
-                    detail_tweets: list[Tweet] = []
-                    for tweet in account_tweets:
-                        if tweet.content_status != "truncated" and not tweet.is_quote:
-                            continue
-                        detail_url = f"{settings.x_detail_base_url.rstrip('/')}/{tweet.id}"
-                        try:
-                            detail_payload = get_json(
-                                detail_url,
-                                user_agent=settings.user_agent,
-                                timeout=settings.http_timeout,
-                                retries=settings.http_retries,
-                            )
-                            detail_tweet = parse_fxtwitter_payload(detail_payload, author=account)
-                            if detail_tweet:
-                                detail_tweets.append(detail_tweet)
-                        except FetchError as exc:
-                            LOG.info("X detail fallback unavailable for %s/%s: %s", account, tweet.id, exc)
-                    account_tweets = merge_tweets(account_tweets + detail_tweets)
                 if account_tweets:
                     x_available[account] = True
                     all_tweets.extend(account_tweets)

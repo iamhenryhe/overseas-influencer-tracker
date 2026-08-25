@@ -54,6 +54,7 @@ class Settings:
     translate_x: bool
     summarize_x: bool
     require_ai_enrichment: bool
+    require_x_full_text: bool
     include_replies: bool
     max_push_per_day: int
     max_digest_items: int
@@ -88,6 +89,7 @@ class Settings:
             translate_x=_bool("TRANSLATE_X", True),
             summarize_x=_bool("SUMMARIZE_X", True),
             require_ai_enrichment=_bool("REQUIRE_AI_ENRICHMENT", False),
+            require_x_full_text=_bool("REQUIRE_X_FULL_TEXT", False),
             include_replies=_bool("INCLUDE_REPLIES", True),
             max_push_per_day=max(1, _int("MAX_PUSH_PER_DAY", 200)),
             max_digest_items=max(1, _int("MAX_DIGEST_ITEMS", 20)),

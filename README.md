@@ -9,7 +9,7 @@
 
 当前实现不购买 X API、不使用登录 Cookie、不需要梯子或 VPS。采集顺序是：
 
-1. 两个账号优先读取公开 X 主页 HTML；X HTML 只给预览时尝试免费公开详情中转源。
+1. 两个账号优先读取公开 X 主页 HTML 发现新 ID；真正准备推送的新帖子默认调用免费的 FxTwitter 详情中转源拿正文，解决 X 长文公开预览不完整的问题。
 2. 只有 Serenity 的 X 页面被屏蔽、读取失败或完全无法解析时，才使用 `aichainmap` 的公开 feed/页面作为备用，不把两边的重复内容同时合并。
 3. 中文：aichainmap 备用数据有中文时直接使用；X 英文内容没有中文时，使用智谱 GLM 翻译。随后对真正要推送的帖子调用 GLM 生成 1–3 句中文总结。翻译或总结失败仍保留可用内容。
 4. 本地状态：用 `state.json` 保存发布时间水位、已见 ID 和发送记录。
@@ -61,7 +61,7 @@ GitHub Actions 使用加密 Secret `ZHIPU_API_KEY` 调用智谱 GLM Coding Plan�
 
 工作流启动后会在 GitHub Runner 上持续监控约 5 小时，每 60 秒抓取一次；窗口结束时自动接力启动下一轮。另有每小时一次的 `schedule` 作为异常恢复兜底。这样不依赖每 5 分钟创建一个短任务，但 GitHub 高负载或平台故障时仍可能影响任务启动。工作流会把 `state.json` 回写到仓库，每日最多 200 个逻辑推送。
 
-正式工作流开启 `REQUIRE_AI_ENRICHMENT=true`：智谱翻译或总结失败时，本轮不发送、不写入已发送状态，下一分钟自动重试；智谱接口错误会在 Actions 日志中记录 HTTP 状态和 API 错误信息。
+正式工作流开启 `REQUIRE_AI_ENRICHMENT=true` 和 `REQUIRE_X_FULL_TEXT=true`：智谱翻译或总结失败，或 X 长文详情暂时拿不到时，本轮不发送、不写入已发送状态，下一分钟自动重试；智谱接口错误会在 Actions 日志中记录 HTTP 状态和 API 错误信息。
 
 `Tracker watchdog` 工作流每 5 分钟检查一次 `monitor_heartbeat.json`：超过 15 分钟没有心跳、某次检查报错或跟踪任务停止时，通过 PushPlus 发送报警；恢复后发送一条恢复通知。同一故障只报警一次，避免重复打扰。
 

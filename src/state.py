@@ -34,6 +34,7 @@ def empty_state() -> dict[str, Any]:
         "version": 3,
         "initialized": False,
         "seen_ids": [],
+        "retry_ids": [],
         "claims": {},
         "last_published_at": {},
         "daily_push": {},
@@ -72,6 +73,7 @@ class StateStore:
         if isinstance(value, dict):
             state.update(value)
         state.setdefault("seen_ids", [])
+        state.setdefault("retry_ids", [])
         state.setdefault("claims", {})
         # v2 used the ambiguous name `last_seen`; migrate it to the actual
         # semantic meaning: the latest published timestamp per author.
@@ -115,19 +117,39 @@ class StateStore:
 
     def candidates(self, state: dict[str, Any], tweets: list[Tweet], *, include_old: bool = False) -> list[Tweet]:
         seen = set(state.get("seen_ids", []))
+        retry_ids = set(state.get("retry_ids", []))
         claims = state.get("claims", {})
         watermarks = state.get("last_published_at", {})
         result = []
         for tweet in tweets:
             if tweet.key in seen or tweet.key in claims:
                 continue
+            # A detail lookup may fail after newer posts have advanced the
+            # watermark. Keep explicitly deferred posts retryable.
+            if tweet.key in retry_ids:
+                result.append(tweet)
+                continue
             if not include_old and watermarks.get(tweet.author) and tweet.published_at <= watermarks[tweet.author]:
                 continue
             result.append(tweet)
         return sorted(result, key=lambda item: (item.published_at, item.id))
 
+    def defer(self, state: dict[str, Any], tweets: list[Tweet]) -> None:
+        """Keep posts with unavailable full text eligible for a later retry."""
+
+        retry_ids = state.setdefault("retry_ids", [])
+        for tweet in tweets:
+            if tweet.key not in retry_ids:
+                retry_ids.append(tweet.key)
+        if len(retry_ids) > MAX_SEEN:
+            del retry_ids[:-MAX_SEEN]
+
     def claim(self, state: dict[str, Any], tweets: list[Tweet], recipient_count: int) -> None:
         claims = state.setdefault("claims", {})
+        selected_keys = {tweet.key for tweet in tweets}
+        state["retry_ids"] = [
+            key for key in state.setdefault("retry_ids", []) if key not in selected_keys
+        ]
         recipient_ids = [f"recipient_{index + 1}" for index in range(recipient_count)]
         for tweet in tweets:
             claims[tweet.key] = {

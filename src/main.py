@@ -141,12 +141,17 @@ def run(args: argparse.Namespace) -> int:
             if tweet.content_status != "complete" and _has_x_html_source(tweet)
         ]
         if settings.require_x_full_text and incomplete_x:
-            LOG.error(
-                "X full text is unavailable for %s candidate(s); leaving them unclaimed for retry: %s",
+            store.defer(state, incomplete_x)
+            store.save(state)
+            selected = [tweet for tweet in selected if tweet not in incomplete_x]
+            LOG.warning(
+                "X full text is unavailable for %s candidate(s); deferred for retry: %s",
                 len(incomplete_x),
                 [tweet.key for tweet in incomplete_x],
             )
-            return 1
+            if not selected:
+                LOG.info("all current candidates are waiting for full text; tracker will keep polling")
+                return 0
 
         # Translate only posts that will actually be delivered.
         enrichment_ok = enrich_candidates(selected, settings)

@@ -61,7 +61,7 @@ GitHub Actions 使用加密 Secret `ZHIPU_API_KEY` 调用智谱 GLM Coding Plan�
 
 工作流启动后会在 GitHub Runner 上持续监控约 5 小时，每 60 秒抓取一次；窗口结束时自动接力启动下一轮。另有每小时一次的 `schedule` 作为异常恢复兜底。这样不依赖每 5 分钟创建一个短任务，但 GitHub 高负载或平台故障时仍可能影响任务启动。工作流会把 `state.json` 回写到仓库，每日最多 200 个逻辑推送。
 
-正式工作流开启 `REQUIRE_AI_ENRICHMENT=true` 和 `REQUIRE_X_FULL_TEXT=true`：智谱翻译或总结失败，或 X 长文详情暂时拿不到时，本轮不发送、不写入已发送状态，下一分钟自动重试；智谱接口错误会在 Actions 日志中记录 HTTP 状态和 API 错误信息。
+正式工作流开启 `REQUIRE_AI_ENRICHMENT=true` 和 `REQUIRE_X_FULL_TEXT=true`：智谱翻译或总结失败，或 X 长文详情暂时拿不到时，不发送该条、不写入已发送状态，下一分钟自动重试；单条详情故障不会阻塞同一轮其他完整帖子。智谱接口错误会在 Actions 日志中记录 HTTP 状态和 API 错误信息。
 
 `Tracker watchdog` 工作流每 5 分钟检查一次 `monitor_heartbeat.json`：超过 15 分钟没有心跳、某次检查报错或跟踪任务停止时，通过 PushPlus 发送报警；恢复后发送一条恢复通知。同一故障只报警一次，避免重复打扰。
 

@@ -73,6 +73,24 @@ class TrackerTests(unittest.TestCase):
             store.record_push_attempt(state)
             self.assertEqual(store.push_count(state), 1)
 
+    def test_deferred_post_survives_a_newer_watermark(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = StateStore(Path(directory) / "state.json")
+            state = empty_state()
+            state["initialized"] = True
+            state["last_published_at"]["jukan05"] = "2026-08-12T09:00:00Z"
+            stuck = Tweet(
+                "stuck",
+                "jukan05",
+                "2026-08-12T08:00:00Z",
+                "needs full text",
+                "https://x.com/jukan05/status/stuck",
+            )
+            store.defer(state, [stuck])
+            self.assertEqual(store.candidates(state, [stuck]), [stuck])
+            store.claim(state, [stuck], 1)
+            self.assertEqual(store.candidates(state, [stuck]), [])
+
     def test_x_full_text_and_quote_metadata(self):
         page = """
         <article itemType="https://schema.org/SocialMediaPosting">

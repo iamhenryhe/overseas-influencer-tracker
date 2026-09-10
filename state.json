@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "initialized": true,
   "seen_ids": [
     "jukan05:2087689684298461445",
@@ -541,7 +541,26 @@
     "aleabitoreddit:2097672417984520532",
     "aleabitoreddit:2097743984596861401",
     "aleabitoreddit:2097791362653724855",
-    "aleabitoreddit:2097815176838017066"
+    "aleabitoreddit:2097815176838017066",
+    "jukan05:2095143510089605220",
+    "jukan05:2095096148419907950",
+    "jukan05:2095093647633174971",
+    "jukan05:2095044341383504370",
+    "jukan05:2095013106183459317",
+    "jukan05:2095013103633313851",
+    "jukan05:2094991959576481909",
+    "jukan05:2094960950587924567",
+    "jukan05:2094958334436909399",
+    "jukan05:2094941521082769570",
+    "jukan05:2094921826015273402",
+    "jukan05:2094690754685993096",
+    "jukan05:2094669476155511252",
+    "jukan05:2094624482027774445",
+    "jukan05:2094602871694311539",
+    "jukan05:2094593254801223840",
+    "jukan05:2094568483287888005",
+    "jukan05:2094567984425820502",
+    "jukan05:2094565589838885027"
   ],
   "retry_ids": [
     "aleabitoreddit:2092166669900914978",
@@ -550,7 +569,18 @@
     "aleabitoreddit:2093582328857833883",
     "aleabitoreddit:2093604758485717289",
     "aleabitoreddit:2093839436782190731",
-    "aleabitoreddit:2094454096552202629"
+    "aleabitoreddit:2094454096552202629",
+    "jukan05:2090575465157456352",
+    "jukan05:2090592449978851486",
+    "aleabitoreddit:2092354322432684098",
+    "aleabitoreddit:2092186856792506435",
+    "jukan05:2092752533358080202",
+    "aleabitoreddit:2094298008955535500",
+    "aleabitoreddit:2094281116421370213",
+    "aleabitoreddit:2094788427602653632",
+    "aleabitoreddit:2094787562774864039",
+    "aleabitoreddit:2094786201605808566",
+    "jukan05:2094656473939009585"
   ],
   "claims": {
     "jukan05:2087711056470987222": {
@@ -5364,15 +5394,284 @@
       "results": {
         "recipient_1": true
       }
+    },
+    "jukan05:2095143510089605220": {
+      "claimed_at": "2026-09-10T06:39:13.346869Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530033Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2095096148419907950": {
+      "claimed_at": "2026-09-10T06:39:13.346914Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530062Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2095093647633174971": {
+      "claimed_at": "2026-09-10T06:39:13.346953Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530074Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2095044341383504370": {
+      "claimed_at": "2026-09-10T06:39:13.346976Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530086Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2095013106183459317": {
+      "claimed_at": "2026-09-10T06:39:13.346994Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530098Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2095013103633313851": {
+      "claimed_at": "2026-09-10T06:39:13.347011Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530111Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094991959576481909": {
+      "claimed_at": "2026-09-10T06:39:13.347028Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530125Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094960950587924567": {
+      "claimed_at": "2026-09-10T06:39:13.347068Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530135Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094958334436909399": {
+      "claimed_at": "2026-09-10T06:39:13.347092Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530148Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094941521082769570": {
+      "claimed_at": "2026-09-10T06:39:13.347117Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530159Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094921826015273402": {
+      "claimed_at": "2026-09-10T06:39:13.347141Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530174Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094690754685993096": {
+      "claimed_at": "2026-09-10T06:39:13.347165Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530191Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094669476155511252": {
+      "claimed_at": "2026-09-10T06:39:13.347196Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530224Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094624482027774445": {
+      "claimed_at": "2026-09-10T06:39:13.347235Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530236Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094602871694311539": {
+      "claimed_at": "2026-09-10T06:39:13.347257Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530245Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094593254801223840": {
+      "claimed_at": "2026-09-10T06:39:13.347286Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530253Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094568483287888005": {
+      "claimed_at": "2026-09-10T06:39:13.347315Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530260Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094567984425820502": {
+      "claimed_at": "2026-09-10T06:39:13.347344Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530268Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2094565589838885027": {
+      "claimed_at": "2026-09-10T06:39:13.347374Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-10T06:39:14.530276Z",
+      "results": {
+        "recipient_1": true
+      }
     }
   },
   "last_published_at": {
-    "jukan05": "2026-08-31T14:06:34Z",
+    "jukan05": "2026-09-02T13:35:13Z",
     "aleabitoreddit": "2026-09-09T22:31:28Z"
   },
-  "daily_push": {
-    "date": "2026-09-09",
-    "count": 9
+  "last_published_id": {
+    "jukan05": "2095143510089605220"
   },
-  "updated_at": "2026-09-09T22:33:09.174202Z"
+  "daily_push": {
+    "date": "2026-09-10",
+    "count": 1
+  },
+  "updated_at": "2026-09-10T06:39:14.530371Z"
 }

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import http.client
 import logging
 import time
 import urllib.error
@@ -38,7 +39,11 @@ def get_bytes(url: str, *, user_agent: str, timeout: int, retries: int) -> bytes
             LOG.warning("GET %s failed with HTTP %s (attempt %s/%s)", url, exc.code, attempt + 1, retries + 1)
             if not retryable or attempt >= retries:
                 break
-        except (urllib.error.URLError, TimeoutError, OSError, FetchError) as exc:
+        # Some public relays (and X itself) occasionally close a chunked
+        # response before urllib has read the advertised Content-Length. Treat
+        # that as a transient fetch failure so the normal retry loop can make a
+        # clean request instead of aborting the whole watcher.
+        except (urllib.error.URLError, TimeoutError, OSError, http.client.HTTPException, FetchError) as exc:
             last_error = exc
             LOG.warning("GET %s failed: %s (attempt %s/%s)", url, exc, attempt + 1, retries + 1)
             if attempt >= retries:
@@ -61,4 +66,3 @@ def get_json(url: str, *, user_agent: str, timeout: int, retries: int) -> dict[s
     if not isinstance(value, dict):
         raise FetchError(f"GET {url} returned {type(value).__name__}, expected object")
     return value
-

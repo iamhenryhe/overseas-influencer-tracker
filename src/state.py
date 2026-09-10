@@ -31,12 +31,13 @@ def utc_date() -> str:
 
 def empty_state() -> dict[str, Any]:
     return {
-        "version": 3,
+        "version": 4,
         "initialized": False,
         "seen_ids": [],
         "retry_ids": [],
         "claims": {},
         "last_published_at": {},
+        "last_published_id": {},
         "daily_push": {},
     }
 
@@ -80,8 +81,17 @@ class StateStore:
         if "last_published_at" not in state:
             state["last_published_at"] = state.get("last_seen", {})
         state.pop("last_seen", None)
+        state.setdefault("last_published_id", {})
         state.setdefault("daily_push", {})
-        state["version"] = 3
+        # A failed PushPlus request used to remain in claims forever. Keep the
+        # audit record, but make those definite failures retryable after an
+        # upgrade. `claimed_before_delivery` stays non-retryable because the
+        # send may have succeeded before a runner was interrupted.
+        retry_ids = state.setdefault("retry_ids", [])
+        for key, claim in state.get("claims", {}).items():
+            if isinstance(claim, dict) and claim.get("status") == "partial_or_failed" and key not in retry_ids:
+                retry_ids.append(key)
+        state["version"] = 4
         return state
 
     def save(self, state: dict[str, Any]) -> None:
@@ -113,6 +123,7 @@ class StateStore:
             previous = state.setdefault("last_published_at", {}).get(tweet.author, "")
             if tweet.published_at > previous:
                 state["last_published_at"][tweet.author] = tweet.published_at
+                state.setdefault("last_published_id", {})[tweet.author] = tweet.id
         state["initialized"] = True
 
     def candidates(self, state: dict[str, Any], tweets: list[Tweet], *, include_old: bool = False) -> list[Tweet]:
@@ -122,12 +133,12 @@ class StateStore:
         watermarks = state.get("last_published_at", {})
         result = []
         for tweet in tweets:
-            if tweet.key in seen or tweet.key in claims:
-                continue
             # A detail lookup may fail after newer posts have advanced the
             # watermark. Keep explicitly deferred posts retryable.
             if tweet.key in retry_ids:
                 result.append(tweet)
+                continue
+            if tweet.key in seen or tweet.key in claims:
                 continue
             if not include_old and watermarks.get(tweet.author) and tweet.published_at <= watermarks[tweet.author]:
                 continue
@@ -162,17 +173,25 @@ class StateStore:
             previous = state.setdefault("last_published_at", {}).get(tweet.author, "")
             if tweet.published_at > previous:
                 state["last_published_at"][tweet.author] = tweet.published_at
+                state.setdefault("last_published_id", {})[tweet.author] = tweet.id
         if len(claims) > MAX_CLAIMS:
             oldest = sorted(claims, key=lambda key: claims[key].get("claimed_at", ""))
             for key in oldest[:-MAX_CLAIMS]:
                 del claims[key]
 
     def record_delivery(self, state: dict[str, Any], tweets: list[Tweet], results: dict[str, bool]) -> None:
+        delivered = bool(results) and all(results.values())
+        retry_ids = state.setdefault("retry_ids", [])
         for tweet in tweets:
             claim = state.setdefault("claims", {}).setdefault(tweet.key, {})
-            claim["status"] = "delivered" if all(results.values()) else "partial_or_failed"
+            claim["status"] = "delivered" if delivered else "partial_or_failed"
             claim["delivered_at"] = utc_now()
             claim["results"] = results
+            if delivered:
+                state["retry_ids"] = [key for key in retry_ids if key != tweet.key]
+                retry_ids = state["retry_ids"]
+            elif tweet.key not in retry_ids:
+                retry_ids.append(tweet.key)
 
     @staticmethod
     def push_count(state: dict[str, Any]) -> int:

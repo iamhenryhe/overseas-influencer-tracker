@@ -50,6 +50,8 @@ class Settings:
     zhipu_model: str
     fetch_x_html: bool
     fetch_x_detail: bool
+    x_timeline_base_url: str
+    x_timeline_max_pages: int
     fetch_aichainmap: bool
     translate_x: bool
     summarize_x: bool
@@ -85,6 +87,10 @@ class Settings:
             zhipu_model=os.getenv("ZHIPU_MODEL", "glm-5.2").strip() or "glm-5.2",
             fetch_x_html=_bool("FETCH_X_HTML", True),
             fetch_x_detail=_bool("FETCH_X_DETAIL", True),
+            x_timeline_base_url=os.getenv(
+                "X_TIMELINE_BASE_URL", "https://api.fxtwitter.com/2/profile"
+            ).rstrip("/"),
+            x_timeline_max_pages=max(1, _int("X_TIMELINE_MAX_PAGES", 20)),
             fetch_aichainmap=_bool("FETCH_AICHAINMAP", True),
             translate_x=_bool("TRANSLATE_X", True),
             summarize_x=_bool("SUMMARIZE_X", True),

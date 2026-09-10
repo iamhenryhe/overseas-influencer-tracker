@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
 from typing import Any, Iterable
+from urllib.parse import quote, urlencode
 
 from .config import Settings
 from .http_client import FetchError, get_json, get_text
@@ -225,6 +226,133 @@ def parse_fxtwitter_payload(
     )
 
 
+def parse_fxtwitter_profile_payload(
+    payload: dict[str, Any],
+    *,
+    author: str,
+    source: str = "x_timeline:fxtwitter",
+) -> list[Tweet]:
+    """Parse FxTwitter v2's free public user-timeline response."""
+
+    target = author.lower().lstrip("@")
+    results = payload.get("results", [])
+    if not isinstance(results, list):
+        return []
+
+    tweets: list[Tweet] = []
+    for raw in results:
+        if not isinstance(raw, dict):
+            continue
+        raw_author = raw.get("author") if isinstance(raw.get("author"), dict) else {}
+        screen_name = clean_text(raw_author.get("screen_name"))
+        if screen_name and screen_name.lower().lstrip("@") != target:
+            continue
+
+        raw_text = raw.get("raw_text") if isinstance(raw.get("raw_text"), dict) else {}
+        text = clean_text(raw.get("text") or raw_text.get("text"))
+        tweet_id = clean_text(raw.get("id"))
+        if not tweet_id or not text:
+            continue
+
+        quote_raw = raw.get("quote") if isinstance(raw.get("quote"), dict) else None
+        quote = None
+        if quote_raw:
+            quote_author = quote_raw.get("author") if isinstance(quote_raw.get("author"), dict) else {}
+            quote = {
+                "id": clean_text(quote_raw.get("id")),
+                "url": clean_text(quote_raw.get("url")),
+                "text": clean_text(quote_raw.get("text")),
+                "author": clean_text(quote_author.get("screen_name")),
+            }
+
+        media: list[str] = []
+        media_block = raw.get("media") if isinstance(raw.get("media"), dict) else {}
+        media_items = media_block.get("all", [])
+        if isinstance(media_items, list):
+            for item in media_items:
+                if isinstance(item, dict) and item.get("url"):
+                    media.append(str(item["url"]))
+
+        created_at = raw.get("created_at")
+        if not created_at and raw.get("created_timestamp"):
+            try:
+                created_at = datetime.fromtimestamp(float(raw["created_timestamp"]), timezone.utc).isoformat()
+            except (TypeError, ValueError, OverflowError):
+                created_at = ""
+
+        replying_to = raw.get("replying_to")
+        reply_to = replying_to if isinstance(replying_to, dict) else ({"url": str(replying_to)} if replying_to else None)
+        tweet = from_raw(
+            {
+                "id": tweet_id,
+                "published_at": created_at,
+                "text": text,
+                "url": clean_text(raw.get("url")) or f"https://x.com/{target}/status/{tweet_id}",
+                "media": media,
+                "is_reply": bool(replying_to),
+                "is_quote": bool(quote),
+                "is_retweet": bool(raw.get("reposted_by")),
+                "reply_to": reply_to,
+                "quote": quote,
+                "content_status": "complete",
+            },
+            author=target,
+            source=source,
+        )
+        if tweet:
+            tweets.append(tweet)
+    return _dedupe_tweets(tweets)
+
+
+def fetch_fxtwitter_profile(
+    account: str,
+    settings: Settings,
+    *,
+    stop_at: str = "",
+) -> list[Tweet]:
+    """Fetch a public profile timeline, paging only when catching up."""
+
+    base_url = getattr(settings, "x_timeline_base_url", "https://api.fxtwitter.com/2/profile").rstrip("/")
+    try:
+        max_pages = max(1, int(getattr(settings, "x_timeline_max_pages", 20)))
+    except (TypeError, ValueError):
+        max_pages = 20
+
+    cursor = ""
+    collected: list[Tweet] = []
+    for page_number in range(max_pages):
+        query = {"count": 20}
+        if cursor:
+            query["cursor"] = cursor
+        url = f"{base_url}/{quote(account, safe='')}/statuses?{urlencode(query)}"
+        try:
+            payload = get_json(
+                url,
+                user_agent=settings.user_agent,
+                timeout=settings.http_timeout,
+                retries=settings.http_retries,
+            )
+        except FetchError:
+            if page_number == 0:
+                raise
+            LOG.warning("FxTwitter profile pagination stopped for %s after %s page(s)", account, page_number)
+            break
+
+        page_tweets = parse_fxtwitter_profile_payload(payload, author=account)
+        collected.extend(page_tweets)
+        if not stop_at or any(tweet.published_at and tweet.published_at <= stop_at for tweet in page_tweets):
+            break
+
+        next_cursor = payload.get("cursor", {}).get("bottom") if isinstance(payload.get("cursor"), dict) else ""
+        if not next_cursor or next_cursor == cursor:
+            break
+        cursor = str(next_cursor)
+
+    if len(collected) and cursor and len(collected) >= max_pages * 20:
+        LOG.warning("FxTwitter profile pagination reached %s page limit for %s", max_pages, account)
+    return merge_tweets(collected)
+
+
 def _decode_live_array(page: str) -> list[dict[str, Any]]:
     marker = "window.__LIVE0__"
     start = page.find(marker)
@@ -339,9 +467,14 @@ def hydrate_x_details(tweets: list[Tweet], settings: Settings) -> list[Tweet]:
     return _dedupe_tweets(hydrated)
 
 
-def fetch_sources(settings: Settings) -> tuple[list[Tweet], dict[str, str]]:
+def fetch_sources(
+    settings: Settings,
+    *,
+    watermarks: dict[str, str] | None = None,
+) -> tuple[list[Tweet], dict[str, str]]:
     all_tweets: list[Tweet] = []
     diagnostics: dict[str, str] = {}
+    watermarks = watermarks or {}
 
     # X is the primary source. Keep a per-account availability flag so the
     # Serenity mirror is only touched when the direct X page is unavailable.
@@ -370,6 +503,47 @@ def fetch_sources(settings: Settings) -> tuple[list[Tweet], dict[str, str]]:
                 x_available[account] = False
                 diagnostics[f"x_html:{account}"] = f"error:{exc}"
                 LOG.warning("X public profile unavailable for %s: %s", account, exc)
+
+            if not x_available.get(account, False):
+                try:
+                    timeline_tweets = fetch_fxtwitter_profile(
+                        account,
+                        settings,
+                        stop_at=watermarks.get(account, ""),
+                    )
+                    if timeline_tweets:
+                        x_available[account] = True
+                        all_tweets.extend(timeline_tweets)
+                        diagnostics[f"x_timeline:{account}"] = f"fallback_ok:{len(timeline_tweets)}"
+                    else:
+                        diagnostics[f"x_timeline:{account}"] = "error:no_posts"
+                        LOG.warning("FxTwitter profile returned no usable posts for %s", account)
+                except FetchError as exc:
+                    diagnostics[f"x_timeline:{account}"] = f"error:{exc}"
+                    LOG.warning("FxTwitter profile unavailable for %s: %s", account, exc)
+
+    # If X HTML was disabled, still give each account the same free timeline
+    # fallback. This is useful for GitHub runners whose IP range is blocked by
+    # X while the public FxTwitter relay remains reachable.
+    if not settings.fetch_x_html:
+        for account in settings.accounts:
+            if x_available.get(account, False):
+                continue
+            try:
+                timeline_tweets = fetch_fxtwitter_profile(
+                    account,
+                    settings,
+                    stop_at=watermarks.get(account, ""),
+                )
+                if timeline_tweets:
+                    x_available[account] = True
+                    all_tweets.extend(timeline_tweets)
+                    diagnostics[f"x_timeline:{account}"] = f"fallback_ok:{len(timeline_tweets)}"
+                else:
+                    diagnostics[f"x_timeline:{account}"] = "error:no_posts"
+            except FetchError as exc:
+                diagnostics[f"x_timeline:{account}"] = f"error:{exc}"
+                LOG.warning("FxTwitter profile unavailable for %s: %s", account, exc)
 
     # aichainmap is a backup for Serenity only. If X returned usable Serenity
     # posts, do not merge the mirror's copy into the primary result set.

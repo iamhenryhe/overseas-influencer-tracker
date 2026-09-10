@@ -59,6 +59,8 @@ jobs:
           REQUIRE_AI_ENRICHMENT: "true"
           REQUIRE_X_FULL_TEXT: "true"
           FETCH_X_DETAIL: "true"
+          X_TIMELINE_BASE_URL: https://api.fxtwitter.com/2/profile
+          X_TIMELINE_MAX_PAGES: "20"
           BOOTSTRAP_MODE: ${{ inputs.bootstrap_mode || 'latest' }}
           MAX_PUSH_PER_DAY: "200"
           POLL_INTERVAL_SECONDS: "60"

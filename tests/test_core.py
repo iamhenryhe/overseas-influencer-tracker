@@ -10,6 +10,7 @@ from src.fetchers import (
     hydrate_x_details,
     parse_aichainmap_payload,
     parse_fxtwitter_payload,
+    parse_fxtwitter_profile_payload,
     parse_x_profile,
 )
 from src.http_client import FetchError
@@ -127,6 +128,30 @@ class TrackerTests(unittest.TestCase):
         self.assertIsNotNone(tweet)
         self.assertEqual(tweet.published_at, "2026-08-13T01:21:18Z")
         self.assertEqual(tweet.content_status, "complete")
+
+    def test_fxtwitter_profile_parser(self):
+        tweets = parse_fxtwitter_profile_payload(
+            {
+                "results": [
+                    {
+                        "id": "790",
+                        "url": "https://x.com/jukan05/status/790",
+                        "text": "A complete timeline post",
+                        "created_at": "Thu Aug 13 01:21:18 +0000 2026",
+                        "author": {"screen_name": "jukan05"},
+                        "replying_to": None,
+                        "quote": None,
+                        "media": {"all": []},
+                    }
+                ]
+            },
+            author="jukan05",
+        )
+        self.assertEqual(len(tweets), 1)
+        self.assertEqual(tweets[0].id, "790")
+        self.assertEqual(tweets[0].published_at, "2026-08-13T01:21:18Z")
+        self.assertEqual(tweets[0].sources, ["x_timeline:fxtwitter"])
+        self.assertEqual(tweets[0].content_status, "complete")
 
     def test_long_anonymous_x_preview_is_hydrated_by_fxtwitter(self):
         preview = "P" * 277
@@ -251,6 +276,40 @@ class TrackerTests(unittest.TestCase):
             tweets, diagnostics = fetch_sources(self._source_settings())
         self.assertEqual([tweet.id for tweet in tweets], ["backup1"])
         self.assertTrue(diagnostics["aichainmap_feed"].startswith("fallback_ok:"))
+
+    def test_fxtwitter_timeline_is_used_when_x_is_blocked(self):
+        payload = {
+            "results": [
+                {
+                    "id": "timeline1",
+                    "url": "https://x.com/aleabitoreddit/status/timeline1",
+                    "created_at": "Thu Aug 13 01:21:18 +0000 2026",
+                    "text": "Timeline fallback post",
+                    "author": {"screen_name": "aleabitoreddit"},
+                }
+            ],
+            "cursor": {"bottom": ""},
+        }
+        with patch("src.fetchers.get_text", side_effect=FetchError("X blocked")), patch(
+            "src.fetchers.get_json", return_value=payload
+        ):
+            tweets, diagnostics = fetch_sources(self._source_settings())
+        self.assertEqual([tweet.id for tweet in tweets], ["timeline1"])
+        self.assertTrue(diagnostics["x_timeline:aleabitoreddit"].startswith("fallback_ok:"))
+        self.assertEqual(diagnostics["aichainmap"], "skipped:x_primary_ok")
+
+    def test_failed_delivery_is_retryable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = StateStore(Path(directory) / "state.json")
+            state = empty_state()
+            state["initialized"] = True
+            tweet = Tweet("failed", "jukan05", "2026-08-13T01:21:18Z", "retry me", "https://x.com/jukan05/status/failed")
+            store.claim(state, [tweet], 1)
+            store.record_delivery(state, [tweet], {"recipient_1": False})
+            self.assertEqual(store.candidates(state, [tweet]), [tweet])
+            store.claim(state, [tweet], 1)
+            store.record_delivery(state, [tweet], {"recipient_1": True})
+            self.assertEqual(store.candidates(state, [tweet]), [])
 
 
 if __name__ == "__main__":

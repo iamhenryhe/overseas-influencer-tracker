@@ -44,13 +44,17 @@ def run(args: argparse.Namespace) -> int:
         LOG.error("PUSHPLUS_TOKEN(S) is missing. Use --dry-run for a local fetch test.")
         return 2
 
+    store = StateStore(settings.state_file)
     try:
-        tweets, diagnostics = fetch_sources(settings)
+        state_snapshot = store.load()
+        tweets, diagnostics = fetch_sources(
+            settings,
+            watermarks=state_snapshot.get("last_published_at", {}),
+        )
     except FetchError as exc:
         LOG.error("fetch failed: %s", exc)
         return 1
     _print_diagnostics(diagnostics, len(tweets))
-    store = StateStore(settings.state_file)
     bootstrap_mode = args.bootstrap_mode or settings.bootstrap_mode
     if bootstrap_mode not in {"latest", "push_latest", "backfill"}:
         LOG.error("BOOTSTRAP_MODE must be latest, push_latest, or backfill; got %r", bootstrap_mode)
@@ -162,8 +166,10 @@ def run(args: argparse.Namespace) -> int:
             )
             return 1
 
-        # Claim before sending. This deliberately favors no duplicate notifications over
-        # automatic re-delivery after an ambiguous network failure.
+        # Claim before sending to avoid duplicates across concurrent runners.
+        # Definite PushPlus failures are put back into retry_ids by
+        # record_delivery; an interruption after an ambiguous send remains
+        # conservative and is not automatically duplicated.
         store.claim(state, selected, len(settings.pushplus_tokens))
         store.save(state)
 

@@ -157,14 +157,43 @@ def run(args: argparse.Namespace) -> int:
                 LOG.info("all current candidates are waiting for full text; tracker will keep polling")
                 return 0
 
-        # Translate only posts that will actually be delivered.
-        enrichment_ok = enrich_candidates(selected, settings)
-        if settings.require_ai_enrichment and not enrichment_ok:
-            LOG.error(
-                "AI enrichment is incomplete; leaving %s candidate(s) unclaimed so the next poll can retry",
-                len(selected),
-            )
-            return 1
+        # Translate and summarize each outgoing post independently. A single
+        # post can be rejected by the model's safety filter (or hit a bad
+        # upstream response) while the rest of the batch is perfectly usable.
+        # Keep the strict AI requirement for each individual post, not for the
+        # whole batch, and leave only failed items retryable.
+        if settings.require_ai_enrichment:
+            enriched: list = []
+            failed_enrichment: list = []
+            for tweet in selected:
+                if enrich_candidates([tweet], settings):
+                    enriched.append(tweet)
+                else:
+                    failed_enrichment.append(tweet)
+            if failed_enrichment:
+                store.defer(state, failed_enrichment)
+                LOG.warning(
+                    "AI enrichment failed for %s candidate(s); deferred only those items: %s",
+                    len(failed_enrichment),
+                    [tweet.key for tweet in failed_enrichment],
+                )
+            selected = enriched
+            if not selected:
+                store.save(state)
+                LOG.info("all current candidates are waiting for AI enrichment; tracker will keep polling")
+                return 0
+        else:
+            # In non-strict/local mode, preserve the original behavior: send
+            # the post even if enrichment is temporarily unavailable.
+            enrich_candidates(selected, settings)
+
+        if send_as_digest:
+            push_units = 1
+        else:
+            push_units = len(selected)
+        if not store.can_push(state, push_units, settings.max_push_per_day):
+            LOG.warning("not enough daily PushPlus budget for the enriched notification set")
+            return 0
 
         # Claim before sending to avoid duplicates across concurrent runners.
         # Definite PushPlus failures are put back into retry_ids by

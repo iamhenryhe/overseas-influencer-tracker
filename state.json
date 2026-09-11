@@ -613,7 +613,10 @@
     "jukan05:2098239576599155186",
     "jukan05:2098239574443250137",
     "aleabitoreddit:2098291179523899475",
-    "aleabitoreddit:2098306366167535766"
+    "aleabitoreddit:2098306366167535766",
+    "aleabitoreddit:2098383837646725143",
+    "aleabitoreddit:2098358633960726788",
+    "jukan05:2098354741550239982"
   ],
   "retry_ids": [
     "aleabitoreddit:2092166669900914978",
@@ -6454,19 +6457,61 @@
       "results": {
         "recipient_1": true
       }
+    },
+    "aleabitoreddit:2098383837646725143": {
+      "claimed_at": "2026-09-11T12:45:05.956285Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-11T12:45:06.584068Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2098358633960726788": {
+      "claimed_at": "2026-09-11T12:45:05.956323Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-11T12:45:07.223363Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2098354741550239982": {
+      "claimed_at": "2026-09-11T12:45:05.956342Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-11T12:45:07.859008Z",
+      "results": {
+        "recipient_1": true
+      }
     }
   },
   "last_published_at": {
-    "jukan05": "2026-09-11T02:37:53Z",
-    "aleabitoreddit": "2026-09-11T07:03:16Z"
+    "jukan05": "2026-09-11T10:15:30Z",
+    "aleabitoreddit": "2026-09-11T12:11:07Z"
   },
   "last_published_id": {
-    "jukan05": "2098239576599155186",
-    "aleabitoreddit": "2098306366167535766"
+    "jukan05": "2098354741550239982",
+    "aleabitoreddit": "2098383837646725143"
   },
   "daily_push": {
     "date": "2026-09-11",
-    "count": 7
+    "count": 10
   },
-  "updated_at": "2026-09-11T07:04:24.050872Z"
+  "updated_at": "2026-09-11T12:45:07.859038Z"
 }

@@ -657,7 +657,14 @@
     "jukan05:2099647929158185040",
     "aleabitoreddit:2099659874892386678",
     "aleabitoreddit:2099674926697545849",
-    "jukan05:2099691355882823791"
+    "jukan05:2099691355882823791",
+    "jukan05:2099785422117470322",
+    "jukan05:2099785420343242934",
+    "aleabitoreddit:2099784954444210243",
+    "jukan05:2099770851516428455",
+    "jukan05:2099768822844792993",
+    "jukan05:2099768821137723876",
+    "jukan05:2099760267844522233"
   ],
   "retry_ids": [
     "aleabitoreddit:2092166669900914978",
@@ -676,7 +683,9 @@
     "aleabitoreddit:2094786201605808566",
     "jukan05:2090575465157456352",
     "jukan05:2090592449978851486",
-    "jukan05:2092752533358080202"
+    "jukan05:2092752533358080202",
+    "jukan05:2099768821137723876",
+    "jukan05:2099760267844522233"
   ],
   "claims": {
     "jukan05:2087711056470987222": {
@@ -7114,19 +7123,117 @@
       "results": {
         "recipient_1": true
       }
+    },
+    "jukan05:2099785422117470322": {
+      "claimed_at": "2026-09-15T11:33:00.176303Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-15T11:33:01.026040Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2099785420343242934": {
+      "claimed_at": "2026-09-15T11:33:00.176338Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-15T11:33:01.847167Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2099784954444210243": {
+      "claimed_at": "2026-09-15T11:33:00.176360Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-15T11:33:02.664014Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2099770851516428455": {
+      "claimed_at": "2026-09-15T11:33:00.176380Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-15T11:33:03.491465Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2099768822844792993": {
+      "claimed_at": "2026-09-15T11:33:00.176397Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-15T11:33:04.323227Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2099768821137723876": {
+      "claimed_at": "2026-09-15T11:33:00.176413Z",
+      "status": "partial_or_failed",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-15T11:33:05.178290Z",
+      "results": {
+        "recipient_1": false
+      }
+    },
+    "jukan05:2099760267844522233": {
+      "claimed_at": "2026-09-15T11:33:00.176429Z",
+      "status": "partial_or_failed",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-09-15T11:33:06.161458Z",
+      "results": {
+        "recipient_1": false
+      }
     }
   },
   "last_published_at": {
-    "jukan05": "2026-09-15T02:46:44Z",
-    "aleabitoreddit": "2026-09-15T01:41:27Z"
+    "jukan05": "2026-09-15T09:00:31Z",
+    "aleabitoreddit": "2026-09-15T08:58:39Z"
   },
   "last_published_id": {
-    "jukan05": "2099691355882823791",
-    "aleabitoreddit": "2099674926697545849"
+    "jukan05": "2099785422117470322",
+    "aleabitoreddit": "2099784954444210243"
   },
   "daily_push": {
     "date": "2026-09-15",
-    "count": 3
+    "count": 10
   },
-  "updated_at": "2026-09-15T02:47:28.009390Z"
+  "updated_at": "2026-09-15T11:33:06.161484Z"
 }

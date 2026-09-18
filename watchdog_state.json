@@ -1,8 +1,7 @@
 {
   "version": 1,
-  "alert_active": true,
-  "alert_kind": "stale",
+  "alert_active": false,
+  "alert_kind": "",
   "alerted_at": "2026-09-17T23:40:03.865126Z",
-  "recovered_at": "2026-09-16T23:51:59.022834Z",
-  "message": "已经 16 分钟没有收到心跳，跟踪器可能停止或卡住。"
+  "recovered_at": "2026-09-18T06:38:22.126498Z"
 }

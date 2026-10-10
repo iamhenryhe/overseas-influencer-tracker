@@ -917,7 +917,10 @@
     "jukan05:2108834190372528595",
     "jukan05:2108850481317736842",
     "jukan05:2108850469774787030",
-    "aleabitoreddit:2108896030326682074"
+    "aleabitoreddit:2108896030326682074",
+    "aleabitoreddit:2108916977616179207",
+    "aleabitoreddit:2108908962397786280",
+    "aleabitoreddit:2108900808956039390"
   ],
   "retry_ids": [
     "aleabitoreddit:2092166669900914978",
@@ -11008,19 +11011,61 @@
       "results": {
         "recipient_1": true
       }
+    },
+    "aleabitoreddit:2108916977616179207": {
+      "claimed_at": "2026-10-10T15:26:30.085449Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-10T15:26:31.422339Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2108908962397786280": {
+      "claimed_at": "2026-10-10T15:26:30.085478Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-10T15:26:32.407170Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2108900808956039390": {
+      "claimed_at": "2026-10-10T15:26:30.085490Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-10T15:26:33.558720Z",
+      "results": {
+        "recipient_1": true
+      }
     }
   },
   "last_published_at": {
     "jukan05": "2026-10-10T09:21:49Z",
-    "aleabitoreddit": "2026-10-10T12:22:49Z"
+    "aleabitoreddit": "2026-10-10T13:46:03Z"
   },
   "last_published_id": {
     "jukan05": "2108850481317736842",
-    "aleabitoreddit": "2108896030326682074"
+    "aleabitoreddit": "2108916977616179207"
   },
   "daily_push": {
     "date": "2026-10-10",
-    "count": 7
+    "count": 10
   },
-  "updated_at": "2026-10-10T12:23:08.682541Z"
+  "updated_at": "2026-10-10T15:26:33.558749Z"
 }

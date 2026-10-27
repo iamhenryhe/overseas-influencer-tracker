@@ -14360,15 +14360,15 @@
       }
     },
     "aleabitoreddit:2115094150626644115": {
-      "claimed_at": "2026-10-27T18:56:34.790384Z",
+      "claimed_at": "2026-10-27T18:57:06.933354Z",
       "status": "partial_or_failed",
       "recipients": {
         "recipient_1": "pending"
       },
       "sources": [
-        "aichainmap_feed"
+        "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-10-27T18:56:43.321807Z",
+      "delivered_at": "2026-10-27T18:57:07.835472Z",
       "results": {
         "recipient_1": false
       }
@@ -14384,7 +14384,7 @@
   },
   "daily_push": {
     "date": "2026-10-27",
-    "count": 21
+    "count": 22
   },
-  "updated_at": "2026-10-27T18:56:43.321836Z"
+  "updated_at": "2026-10-27T18:57:07.835503Z"
 }

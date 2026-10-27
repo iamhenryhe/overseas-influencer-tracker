@@ -1132,7 +1132,16 @@
     "jukan05:2115003975611408820",
     "aleabitoreddit:2115045873734529050",
     "aleabitoreddit:2115056034763137169",
-    "aleabitoreddit:2115060985396670793"
+    "aleabitoreddit:2115060985396670793",
+    "aleabitoreddit:2115118430785606077",
+    "aleabitoreddit:2115115209413292219",
+    "aleabitoreddit:2115104606208606562",
+    "aleabitoreddit:2115102526072922115",
+    "aleabitoreddit:2115100801538683149",
+    "aleabitoreddit:2115099588218814674",
+    "aleabitoreddit:2115097816779673903",
+    "aleabitoreddit:2115096629506457833",
+    "aleabitoreddit:2115094150626644115"
   ],
   "retry_ids": [
     "aleabitoreddit:2092166669900914978",
@@ -1147,7 +1156,11 @@
     "jukan05:2090575465157456352",
     "jukan05:2090592449978851486",
     "jukan05:2092752533358080202",
-    "jukan05:2102389955465200095"
+    "jukan05:2102389955465200095",
+    "aleabitoreddit:2115099588218814674",
+    "aleabitoreddit:2115097816779673903",
+    "aleabitoreddit:2115096629506457833",
+    "aleabitoreddit:2115094150626644115"
   ],
   "claims": {
     "jukan05:2087711056470987222": {
@@ -14233,19 +14246,145 @@
       "results": {
         "recipient_1": true
       }
+    },
+    "aleabitoreddit:2115118430785606077": {
+      "claimed_at": "2026-10-27T18:56:34.790229Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-27T18:56:35.819851Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2115115209413292219": {
+      "claimed_at": "2026-10-27T18:56:34.790293Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-27T18:56:36.742845Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2115104606208606562": {
+      "claimed_at": "2026-10-27T18:56:34.790311Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-27T18:56:37.652280Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2115102526072922115": {
+      "claimed_at": "2026-10-27T18:56:34.790324Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-27T18:56:38.654874Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2115100801538683149": {
+      "claimed_at": "2026-10-27T18:56:34.790336Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-27T18:56:39.613012Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2115099588218814674": {
+      "claimed_at": "2026-10-27T18:56:34.790349Z",
+      "status": "partial_or_failed",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-27T18:56:40.592742Z",
+      "results": {
+        "recipient_1": false
+      }
+    },
+    "aleabitoreddit:2115097816779673903": {
+      "claimed_at": "2026-10-27T18:56:34.790361Z",
+      "status": "partial_or_failed",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-27T18:56:41.530167Z",
+      "results": {
+        "recipient_1": false
+      }
+    },
+    "aleabitoreddit:2115096629506457833": {
+      "claimed_at": "2026-10-27T18:56:34.790373Z",
+      "status": "partial_or_failed",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-27T18:56:42.415860Z",
+      "results": {
+        "recipient_1": false
+      }
+    },
+    "aleabitoreddit:2115094150626644115": {
+      "claimed_at": "2026-10-27T18:56:34.790384Z",
+      "status": "partial_or_failed",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-10-27T18:56:43.321807Z",
+      "results": {
+        "recipient_1": false
+      }
     }
   },
   "last_published_at": {
     "jukan05": "2026-10-27T08:53:37Z",
-    "aleabitoreddit": "2026-10-27T12:40:09Z"
+    "aleabitoreddit": "2026-10-27T16:28:25Z"
   },
   "last_published_id": {
     "jukan05": "2115003975611408820",
-    "aleabitoreddit": "2115060985396670793"
+    "aleabitoreddit": "2115118430785606077"
   },
   "daily_push": {
     "date": "2026-10-27",
-    "count": 12
+    "count": 21
   },
-  "updated_at": "2026-10-27T12:47:47.858120Z"
+  "updated_at": "2026-10-27T18:56:43.321836Z"
 }

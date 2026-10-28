@@ -14524,7 +14524,7 @@
       }
     },
     "jukan05:2115234713040465954": {
-      "claimed_at": "2026-10-28T04:55:06.715383Z",
+      "claimed_at": "2026-10-28T04:55:59.001748Z",
       "status": "partial_or_failed",
       "recipients": {
         "recipient_1": "pending"
@@ -14532,13 +14532,13 @@
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-10-28T04:55:11.716753Z",
+      "delivered_at": "2026-10-28T04:55:59.871574Z",
       "results": {
         "recipient_1": false
       }
     },
     "jukan05:2115234582174024045": {
-      "claimed_at": "2026-10-28T04:55:06.715403Z",
+      "claimed_at": "2026-10-28T04:55:59.001792Z",
       "status": "partial_or_failed",
       "recipients": {
         "recipient_1": "pending"
@@ -14546,7 +14546,7 @@
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-10-28T04:55:12.500740Z",
+      "delivered_at": "2026-10-28T04:56:00.673075Z",
       "results": {
         "recipient_1": false
       }
@@ -14562,7 +14562,7 @@
   },
   "daily_push": {
     "date": "2026-10-28",
-    "count": 7
+    "count": 9
   },
-  "updated_at": "2026-10-28T04:55:12.500783Z"
+  "updated_at": "2026-10-28T04:56:00.673111Z"
 }

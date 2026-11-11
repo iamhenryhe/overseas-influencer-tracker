@@ -1363,7 +1363,10 @@
     "aleabitoreddit:2120526218076504318",
     "aleabitoreddit:2120528660470149506",
     "aleabitoreddit:2120533451279642808",
-    "aleabitoreddit:2120575364238094682"
+    "aleabitoreddit:2120575364238094682",
+    "jukan05:2120643737961591099",
+    "aleabitoreddit:2120594656262287463",
+    "aleabitoreddit:2120581072610349141"
   ],
   "retry_ids": [
     "aleabitoreddit:2092166669900914978",
@@ -17698,19 +17701,61 @@
       "results": {
         "recipient_1": true
       }
+    },
+    "jukan05:2120643737961591099": {
+      "claimed_at": "2026-11-11T22:24:34.224181Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-11-11T22:24:35.106905Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2120594656262287463": {
+      "claimed_at": "2026-11-11T22:24:34.224220Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-11-11T22:24:35.909223Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2120581072610349141": {
+      "claimed_at": "2026-11-11T22:24:34.224246Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-11-11T22:24:36.977920Z",
+      "results": {
+        "recipient_1": true
+      }
     }
   },
   "last_published_at": {
-    "jukan05": "2026-11-11T13:08:47Z",
-    "aleabitoreddit": "2026-11-11T17:52:19Z"
+    "jukan05": "2026-11-11T22:24:01Z",
+    "aleabitoreddit": "2026-11-11T19:08:59Z"
   },
   "last_published_id": {
-    "jukan05": "2120504007106150584",
-    "aleabitoreddit": "2120575364238094682"
+    "jukan05": "2120643737961591099",
+    "aleabitoreddit": "2120594656262287463"
   },
   "daily_push": {
     "date": "2026-11-11",
-    "count": 19
+    "count": 22
   },
-  "updated_at": "2026-11-11T22:04:32.341271Z"
+  "updated_at": "2026-11-11T22:24:36.977946Z"
 }

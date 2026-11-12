@@ -1412,10 +1412,7 @@
     "jukan05:2090575465157456352",
     "jukan05:2090592449978851486",
     "jukan05:2092752533358080202",
-    "jukan05:2102389955465200095",
-    "aleabitoreddit:2120964006328566047",
-    "aleabitoreddit:2120949820684972421",
-    "aleabitoreddit:2120943109505008055"
+    "jukan05:2102389955465200095"
   ],
   "claims": {
     "jukan05:2087711056470987222": {
@@ -18171,45 +18168,45 @@
       }
     },
     "aleabitoreddit:2120964006328566047": {
-      "claimed_at": "2026-11-12T23:02:43.049118Z",
-      "status": "partial_or_failed",
+      "claimed_at": "2026-11-12T23:03:38.012829Z",
+      "status": "delivered",
       "recipients": {
         "recipient_1": "pending"
       },
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-11-12T23:02:43.847099Z",
+      "delivered_at": "2026-11-12T23:03:38.842328Z",
       "results": {
-        "recipient_1": false
+        "recipient_1": true
       }
     },
     "aleabitoreddit:2120949820684972421": {
-      "claimed_at": "2026-11-12T23:02:43.049164Z",
-      "status": "partial_or_failed",
+      "claimed_at": "2026-11-12T23:03:38.012866Z",
+      "status": "delivered",
       "recipients": {
         "recipient_1": "pending"
       },
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-11-12T23:02:44.805382Z",
+      "delivered_at": "2026-11-12T23:03:39.620207Z",
       "results": {
-        "recipient_1": false
+        "recipient_1": true
       }
     },
     "aleabitoreddit:2120943109505008055": {
-      "claimed_at": "2026-11-12T23:02:43.049197Z",
-      "status": "partial_or_failed",
+      "claimed_at": "2026-11-12T23:03:38.012890Z",
+      "status": "delivered",
       "recipients": {
         "recipient_1": "pending"
       },
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-11-12T23:02:45.609359Z",
+      "delivered_at": "2026-11-12T23:03:40.425950Z",
       "results": {
-        "recipient_1": false
+        "recipient_1": true
       }
     }
   },
@@ -18223,7 +18220,7 @@
   },
   "daily_push": {
     "date": "2026-11-12",
-    "count": 29
+    "count": 32
   },
-  "updated_at": "2026-11-12T23:02:45.609398Z"
+  "updated_at": "2026-11-12T23:03:40.425977Z"
 }

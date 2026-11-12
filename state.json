@@ -18171,7 +18171,7 @@
       }
     },
     "aleabitoreddit:2120964006328566047": {
-      "claimed_at": "2026-11-12T23:02:03.594040Z",
+      "claimed_at": "2026-11-12T23:02:43.049118Z",
       "status": "partial_or_failed",
       "recipients": {
         "recipient_1": "pending"
@@ -18179,13 +18179,13 @@
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-11-12T23:02:08.506322Z",
+      "delivered_at": "2026-11-12T23:02:43.847099Z",
       "results": {
         "recipient_1": false
       }
     },
     "aleabitoreddit:2120949820684972421": {
-      "claimed_at": "2026-11-12T23:02:03.594060Z",
+      "claimed_at": "2026-11-12T23:02:43.049164Z",
       "status": "partial_or_failed",
       "recipients": {
         "recipient_1": "pending"
@@ -18193,13 +18193,13 @@
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-11-12T23:02:09.279661Z",
+      "delivered_at": "2026-11-12T23:02:44.805382Z",
       "results": {
         "recipient_1": false
       }
     },
     "aleabitoreddit:2120943109505008055": {
-      "claimed_at": "2026-11-12T23:02:03.594080Z",
+      "claimed_at": "2026-11-12T23:02:43.049197Z",
       "status": "partial_or_failed",
       "recipients": {
         "recipient_1": "pending"
@@ -18207,7 +18207,7 @@
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-11-12T23:02:10.055880Z",
+      "delivered_at": "2026-11-12T23:02:45.609359Z",
       "results": {
         "recipient_1": false
       }
@@ -18223,7 +18223,7 @@
   },
   "daily_push": {
     "date": "2026-11-12",
-    "count": 26
+    "count": 29
   },
-  "updated_at": "2026-11-12T23:02:10.055916Z"
+  "updated_at": "2026-11-12T23:02:45.609398Z"
 }

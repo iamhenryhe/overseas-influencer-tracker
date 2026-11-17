@@ -1482,7 +1482,10 @@
     "aleabitoreddit:2122473428330668200",
     "aleabitoreddit:2122485440469241998",
     "aleabitoreddit:2122490022519844984",
-    "aleabitoreddit:2122519172664209692"
+    "aleabitoreddit:2122519172664209692",
+    "jukan05:2122564872315572517",
+    "jukan05:2122528776076542024",
+    "jukan05:2122528770888495396"
   ],
   "retry_ids": [
     "aleabitoreddit:2092166669900914978",
@@ -19483,19 +19486,61 @@
       "results": {
         "recipient_1": true
       }
+    },
+    "jukan05:2122564872315572517": {
+      "claimed_at": "2026-11-17T07:54:33.078612Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-11-17T07:54:34.364686Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2122528776076542024": {
+      "claimed_at": "2026-11-17T07:54:33.078646Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-11-17T07:54:35.397277Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2122528770888495396": {
+      "claimed_at": "2026-11-17T07:54:33.078663Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-11-17T07:54:36.797463Z",
+      "results": {
+        "recipient_1": true
+      }
     }
   },
   "last_published_at": {
-    "jukan05": "2026-11-16T23:27:21Z",
+    "jukan05": "2026-11-17T05:37:55Z",
     "aleabitoreddit": "2026-11-17T02:36:19Z"
   },
   "last_published_id": {
-    "jukan05": "2122471615292383434",
+    "jukan05": "2122564872315572517",
     "aleabitoreddit": "2122519172664209692"
   },
   "daily_push": {
     "date": "2026-11-17",
-    "count": 3
+    "count": 6
   },
-  "updated_at": "2026-11-17T02:37:29.280331Z"
+  "updated_at": "2026-11-17T07:54:36.797488Z"
 }

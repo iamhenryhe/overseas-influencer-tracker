@@ -1515,10 +1515,7 @@
     "jukan05:2090575465157456352",
     "jukan05:2090592449978851486",
     "jukan05:2092752533358080202",
-    "jukan05:2102389955465200095",
-    "jukan05:2122719823335412106",
-    "jukan05:2122701193289830686",
-    "jukan05:2122697189805678770"
+    "jukan05:2102389955465200095"
   ],
   "claims": {
     "jukan05:2087711056470987222": {
@@ -19716,45 +19713,45 @@
       }
     },
     "jukan05:2122719823335412106": {
-      "claimed_at": "2026-11-17T17:51:59.166426Z",
-      "status": "partial_or_failed",
+      "claimed_at": "2026-11-17T17:52:59.062713Z",
+      "status": "delivered",
       "recipients": {
         "recipient_1": "pending"
       },
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-11-17T17:52:00.747819Z",
+      "delivered_at": "2026-11-17T17:52:59.947999Z",
       "results": {
-        "recipient_1": false
+        "recipient_1": true
       }
     },
     "jukan05:2122701193289830686": {
-      "claimed_at": "2026-11-17T17:51:59.166465Z",
-      "status": "partial_or_failed",
+      "claimed_at": "2026-11-17T17:52:59.062761Z",
+      "status": "delivered",
       "recipients": {
         "recipient_1": "pending"
       },
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-11-17T17:52:01.513572Z",
+      "delivered_at": "2026-11-17T17:53:00.719930Z",
       "results": {
-        "recipient_1": false
+        "recipient_1": true
       }
     },
     "jukan05:2122697189805678770": {
-      "claimed_at": "2026-11-17T17:51:59.166495Z",
-      "status": "partial_or_failed",
+      "claimed_at": "2026-11-17T17:52:59.062793Z",
+      "status": "delivered",
       "recipients": {
         "recipient_1": "pending"
       },
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-11-17T17:52:02.275707Z",
+      "delivered_at": "2026-11-17T17:53:01.498874Z",
       "results": {
-        "recipient_1": false
+        "recipient_1": true
       }
     }
   },
@@ -19768,7 +19765,7 @@
   },
   "daily_push": {
     "date": "2026-11-17",
-    "count": 24
+    "count": 27
   },
-  "updated_at": "2026-11-17T17:52:02.275737Z"
+  "updated_at": "2026-11-17T17:53:01.498902Z"
 }

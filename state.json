@@ -20269,7 +20269,7 @@
       }
     },
     "aleabitoreddit:2123137705597120613": {
-      "claimed_at": "2026-11-18T23:47:37.967744Z",
+      "claimed_at": "2026-11-18T23:48:19.539094Z",
       "status": "partial_or_failed",
       "recipients": {
         "recipient_1": "pending"
@@ -20277,13 +20277,13 @@
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-11-18T23:47:43.913883Z",
+      "delivered_at": "2026-11-18T23:48:20.532558Z",
       "results": {
         "recipient_1": false
       }
     },
     "aleabitoreddit:2123126925908742463": {
-      "claimed_at": "2026-11-18T23:47:37.967758Z",
+      "claimed_at": "2026-11-18T23:48:19.539128Z",
       "status": "partial_or_failed",
       "recipients": {
         "recipient_1": "pending"
@@ -20291,7 +20291,7 @@
       "sources": [
         "x_timeline:fxtwitter"
       ],
-      "delivered_at": "2026-11-18T23:47:44.874091Z",
+      "delivered_at": "2026-11-18T23:48:21.646301Z",
       "results": {
         "recipient_1": false
       }
@@ -20307,7 +20307,7 @@
   },
   "daily_push": {
     "date": "2026-11-18",
-    "count": 29
+    "count": 31
   },
-  "updated_at": "2026-11-18T23:47:44.874122Z"
+  "updated_at": "2026-11-18T23:48:21.646329Z"
 }

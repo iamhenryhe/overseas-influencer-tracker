@@ -1565,7 +1565,10 @@
     "jukan05:2123697418005016931",
     "aleabitoreddit:2123770443337543965",
     "aleabitoreddit:2123762482280055255",
-    "aleabitoreddit:2123749426019868932"
+    "aleabitoreddit:2123749426019868932",
+    "jukan05:2123798152402899371",
+    "jukan05:2123794176705990790",
+    "jukan05:2123767751626108964"
   ],
   "retry_ids": [
     "aleabitoreddit:2092166669900914978",
@@ -20728,19 +20731,61 @@
       "results": {
         "recipient_1": true
       }
+    },
+    "jukan05:2123798152402899371": {
+      "claimed_at": "2026-11-20T15:43:09.484716Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-11-20T15:43:10.507766Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2123794176705990790": {
+      "claimed_at": "2026-11-20T15:43:09.484757Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-11-20T15:43:11.432752Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "jukan05:2123767751626108964": {
+      "claimed_at": "2026-11-20T15:43:09.484775Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "x_timeline:fxtwitter"
+      ],
+      "delivered_at": "2026-11-20T15:43:12.432792Z",
+      "results": {
+        "recipient_1": true
+      }
     }
   },
   "last_published_at": {
-    "jukan05": "2026-11-20T08:38:15Z",
+    "jukan05": "2026-11-20T15:18:32Z",
     "aleabitoreddit": "2026-11-20T13:28:26Z"
   },
   "last_published_id": {
-    "jukan05": "2123697418005016931",
+    "jukan05": "2123798152402899371",
     "aleabitoreddit": "2123770443337543965"
   },
   "daily_push": {
     "date": "2026-11-20",
-    "count": 14
+    "count": 17
   },
-  "updated_at": "2026-11-20T15:42:09.996050Z"
+  "updated_at": "2026-11-20T15:43:12.432820Z"
 }

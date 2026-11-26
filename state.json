@@ -1660,7 +1660,10 @@
     "jukan05:2125884511359807765",
     "jukan05:2125887732035867002",
     "jukan05:2125906538628042782",
-    "jukan05:2125906535151006041"
+    "jukan05:2125906535151006041",
+    "aleabitoreddit:2125986790872121356",
+    "aleabitoreddit:2125984687529267678",
+    "aleabitoreddit:2125976593076252865"
   ],
   "retry_ids": [
     "aleabitoreddit:2092166669900914978",
@@ -22154,19 +22157,61 @@
       "results": {
         "recipient_1": true
       }
+    },
+    "aleabitoreddit:2125986790872121356": {
+      "claimed_at": "2026-11-26T16:26:44.719221Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-11-26T16:26:46.040236Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2125984687529267678": {
+      "claimed_at": "2026-11-26T16:26:44.719270Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-11-26T16:26:47.630424Z",
+      "results": {
+        "recipient_1": true
+      }
+    },
+    "aleabitoreddit:2125976593076252865": {
+      "claimed_at": "2026-11-26T16:26:44.719289Z",
+      "status": "delivered",
+      "recipients": {
+        "recipient_1": "pending"
+      },
+      "sources": [
+        "aichainmap_feed"
+      ],
+      "delivered_at": "2026-11-26T16:26:50.664436Z",
+      "results": {
+        "recipient_1": true
+      }
     }
   },
   "last_published_at": {
     "jukan05": "2026-11-26T10:56:30Z",
-    "aleabitoreddit": "2026-11-26T00:48:28Z"
+    "aleabitoreddit": "2026-11-26T16:15:24Z"
   },
   "last_published_id": {
     "jukan05": "2125906538628042782",
-    "aleabitoreddit": "2125753519739465995"
+    "aleabitoreddit": "2125986790872121356"
   },
   "daily_push": {
     "date": "2026-11-26",
-    "count": 15
+    "count": 18
   },
-  "updated_at": "2026-11-26T10:58:10.872933Z"
+  "updated_at": "2026-11-26T16:26:50.664463Z"
 }

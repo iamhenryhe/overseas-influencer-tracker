@@ -1705,10 +1705,7 @@
     "jukan05:2090592449978851486",
     "jukan05:2092752533358080202",
     "jukan05:2102389955465200095",
-    "jukan05:2125005305537024201",
-    "aleabitoreddit:2126392675037507661",
-    "aleabitoreddit:2126384441018958239",
-    "aleabitoreddit:2126378481714168280"
+    "jukan05:2125005305537024201"
   ],
   "claims": {
     "jukan05:2087711056470987222": {
@@ -22552,45 +22549,45 @@
       }
     },
     "aleabitoreddit:2126392675037507661": {
-      "claimed_at": "2026-11-27T22:23:01.085940Z",
-      "status": "partial_or_failed",
+      "claimed_at": "2026-11-27T22:24:46.433758Z",
+      "status": "delivered",
       "recipients": {
         "recipient_1": "pending"
       },
       "sources": [
         "aichainmap_feed"
       ],
-      "delivered_at": "2026-11-27T22:23:07.493477Z",
+      "delivered_at": "2026-11-27T22:24:47.357927Z",
       "results": {
-        "recipient_1": false
+        "recipient_1": true
       }
     },
     "aleabitoreddit:2126384441018958239": {
-      "claimed_at": "2026-11-27T22:23:01.085954Z",
-      "status": "partial_or_failed",
+      "claimed_at": "2026-11-27T22:24:46.433790Z",
+      "status": "delivered",
       "recipients": {
         "recipient_1": "pending"
       },
       "sources": [
         "aichainmap_feed"
       ],
-      "delivered_at": "2026-11-27T22:23:08.479940Z",
+      "delivered_at": "2026-11-27T22:24:48.297953Z",
       "results": {
-        "recipient_1": false
+        "recipient_1": true
       }
     },
     "aleabitoreddit:2126378481714168280": {
-      "claimed_at": "2026-11-27T22:23:45.386691Z",
-      "status": "partial_or_failed",
+      "claimed_at": "2026-11-27T22:24:46.433808Z",
+      "status": "delivered",
       "recipients": {
         "recipient_1": "pending"
       },
       "sources": [
-        "x_timeline:fxtwitter"
+        "aichainmap_feed"
       ],
-      "delivered_at": "2026-11-27T22:23:46.333576Z",
+      "delivered_at": "2026-11-27T22:24:49.242504Z",
       "results": {
-        "recipient_1": false
+        "recipient_1": true
       }
     }
   },
@@ -22604,7 +22601,7 @@
   },
   "daily_push": {
     "date": "2026-11-27",
-    "count": 23
+    "count": 26
   },
-  "updated_at": "2026-11-27T22:23:46.333603Z"
+  "updated_at": "2026-11-27T22:24:49.242528Z"
 }
